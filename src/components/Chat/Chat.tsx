@@ -113,6 +113,11 @@ export const Chat = () => {
                           {children}
                         </Box>
                       ),
+                      ul: ({ children }) => (
+                        <Box as="ul" pl={4} listStyleType="disc" my={4}>
+                          {children}
+                        </Box>
+                      ),
                       li: ({ children }) => (
                         <Box as="li" mb={2} ml={4}>
                           {children}

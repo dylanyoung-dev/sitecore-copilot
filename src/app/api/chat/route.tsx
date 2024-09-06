@@ -1,4 +1,7 @@
-import { PersonalizeTool } from '@/tools/Sitecore/Personalize';
+import {
+  PersonalizeExperienceCreateTool,
+  PersonalizeListofExperiences,
+} from '@/tools/Sitecore';
 import { NextRequest, NextResponse } from 'next/server';
 import { OpenAI } from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
@@ -32,7 +35,7 @@ export async function POST(req: NextRequest) {
       .runTools({
         model: 'gpt-4o-mini',
         messages: combinedMessages,
-        tools: [PersonalizeTool],
+        tools: [PersonalizeExperienceCreateTool, PersonalizeListofExperiences],
       })
       .on('message', (message) => {
         console.log(message);
