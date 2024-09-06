@@ -84,7 +84,6 @@ export const Chat = () => {
     <Box
       display="flex"
       flexDirection="column"
-      height="100vh"
       p={4}
       borderWidth={1}
       borderRadius="lg"
