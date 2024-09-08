@@ -1,8 +1,9 @@
 'use client';
+import { ProductOptions } from '@/model/ProductOptions';
 import { createContext, useContext } from 'react';
 
 export interface ClientData {
-  product: 'XM Cloud' | 'Personalize/CDP' | 'Content Hub One';
+  product: ProductOptions;
   organizationId: string;
   clientId: string;
   clientSecret: string;
@@ -11,7 +12,8 @@ export interface ClientData {
 export interface ClientContextType {
   clients: ClientData[];
   addClient: (client: ClientData) => void;
-  removeClient: (product: string, organizationId: string) => void;
+  removeClient: (clientId: string) => void;
+  updateClient: (clientId: string, client: ClientData) => void;
 }
 
 export const ClientContext = createContext<ClientContextType | undefined>(

@@ -1,3 +1,4 @@
+import { ClientList } from '@/components/Clients/ClientList';
 import { Heading, Text } from '@chakra-ui/react';
 
 export default function Settings() {
@@ -9,6 +10,8 @@ export default function Settings() {
       <Text fontSize="lg" mb={4}>
         Configure your Sitecore connection client.
       </Text>
+
+      <ClientList />
     </>
   );
 }

@@ -2,7 +2,6 @@
 
 import { ChatModal } from '@/components/Chat/ChatModal';
 import { LeftNavigation } from '@/components/Nav/LeftNavigation';
-import { useClientContext } from '@/context/ClientContext';
 import { Box, Flex, useColorModeValue as mode } from '@chakra-ui/react';
 import { Providers } from './Providers';
 
@@ -16,8 +15,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { clients } = useClientContext();
-
   return (
     <html lang="en">
       <body>

@@ -1,4 +1,7 @@
+'use client';
+
 import { useClientContext } from '@/context/ClientContext';
+import { ProductOptions } from '@/model/ProductOptions';
 import { Box, Circle, Flex, Stack } from '@chakra-ui/react';
 import { FC } from 'react';
 import {
@@ -20,7 +23,11 @@ import { NavItem } from './NavItem';
 interface LeftNavigationProps {}
 
 export const LeftNavigation: FC<LeftNavigationProps> = () => {
-  const { clients } = useClientContext();
+  //const router = useRouter();
+  //const { pathname } = router;
+  const clientContext = useClientContext();
+
+  //const isActive = (path: string) => pathname.startsWith(path);
 
   return (
     <Box w="64" bg="gray.900" color="white" fontSize="sm">
@@ -28,10 +35,12 @@ export const LeftNavigation: FC<LeftNavigationProps> = () => {
         {/* <AccountSwitcher /> */}
         <Stack spacing="8" flex="1" overflow="auto" pt="8">
           <Stack spacing="1">
-            <NavItem active icon={<BiHome />} label="Get Started" />
+            <NavItem active={false} icon={<BiHome />} label="Get Started" />
           </Stack>
 
-          {clients?.some((client) => client.product === 'XM Cloud') && (
+          {clientContext?.clients?.find(
+            (client) => client.product === ProductOptions.XMCloud
+          ) && (
             <NavGroup label="XM Cloud">
               <NavItem icon={<BiCreditCard />} label="Transactions" />
               <NavItem icon={<BiUserCircle />} label="Customers" />
@@ -40,12 +49,16 @@ export const LeftNavigation: FC<LeftNavigationProps> = () => {
             </NavGroup>
           )}
 
-          <NavGroup label="CDP & Personalize">
-            <NavItem icon={<BiNews />} label="Payment Pages" />
-            <NavItem icon={<BiEnvelope />} label="Invoices" />
-            <NavItem icon={<BiPurchaseTagAlt />} label="Plans" />
-            <NavItem icon={<BiRecycle />} label="Subscription" />
-          </NavGroup>
+          {clientContext?.clients?.find(
+            (client) => client.product === ProductOptions.PersonalizeCDP
+          ) && (
+            <NavGroup label="CDP & Personalize">
+              <NavItem icon={<BiNews />} label="Payment Pages" />
+              <NavItem icon={<BiEnvelope />} label="Invoices" />
+              <NavItem icon={<BiPurchaseTagAlt />} label="Plans" />
+              <NavItem icon={<BiRecycle />} label="Subscription" />
+            </NavGroup>
+          )}
         </Stack>
         <Box>
           <Stack spacing="1">

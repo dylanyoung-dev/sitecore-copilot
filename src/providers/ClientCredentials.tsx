@@ -10,6 +10,7 @@ export const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
   const [clients, setClients] = useState<ClientData[]>(() => {
     if (typeof window !== 'undefined' && window.sessionStorage) {
       const storedClients = sessionStorage.getItem('clients');
+      console.log('storedClients', storedClients);
       return storedClients ? JSON.parse(storedClients) : [];
     }
     return [];
@@ -17,6 +18,7 @@ export const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.sessionStorage) {
+      console.log('Updating clients in session storage', clients);
       window.sessionStorage.setItem('clients', JSON.stringify(clients));
     }
   }, [clients]);
@@ -25,17 +27,24 @@ export const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
     setClients((prevClients) => [...prevClients, client]);
   };
 
-  const removeClient = (product: string, organizationId: string) => {
+  const removeClient = (clientId: string) => {
     setClients((prevClients) =>
-      prevClients.filter(
-        (client) =>
-          client.product !== product || client.organizationId !== organizationId
+      prevClients.filter((client) => client.clientId !== clientId)
+    );
+  };
+
+  const updateClient = (clientId: string, updatedClient: ClientData) => {
+    setClients((prevClients) =>
+      prevClients.map((client) =>
+        client.clientId === clientId ? updatedClient : client
       )
     );
   };
 
   return (
-    <ClientContext.Provider value={{ clients, addClient, removeClient }}>
+    <ClientContext.Provider
+      value={{ clients, addClient, removeClient, updateClient }}
+    >
       {children}
     </ClientContext.Provider>
   );
