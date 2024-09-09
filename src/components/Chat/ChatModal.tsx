@@ -5,7 +5,6 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalFooter,
   ModalHeader,
   ModalOverlay,
   useDisclosure,
@@ -27,31 +26,19 @@ export const ChatModal: FC = () => {
         width="56px"
         height="56px"
         p={0}
-        colorScheme="blue"
+        colorScheme="primary"
         onClick={onOpen}
       >
         <BiChat size="32px" />
       </Button>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent
-          position="fixed"
-          bottom="70px"
-          right="20px"
-          margin="0"
-          width="400px"
-          maxHeight="600px"
-        >
-          <ModalHeader>Chat</ModalHeader>
+      <Modal size="xl" isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay backdropBlur="2px" />
+        <ModalContent position="fixed" bottom="70px" right="20px">
+          <ModalHeader>AI Assistant</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Chat />
           </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Close
-            </Button>
-          </ModalFooter>
         </ModalContent>
       </Modal>
     </>

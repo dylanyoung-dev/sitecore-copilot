@@ -2,7 +2,6 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 import { FC, ReactElement, ReactNode } from 'react';
 
 interface NavItemProps {
-  href?: string;
   label: string;
   subtle?: boolean;
   active?: boolean;

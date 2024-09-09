@@ -4,9 +4,10 @@ import {
   Box,
   Button,
   Divider,
+  Flex,
   HStack,
   Input,
-  Spinner,
+  Progress,
   Text,
   VStack,
 } from '@chakra-ui/react';
@@ -30,10 +31,14 @@ export const Chat = () => {
     },
   ]);
 
-  useEffect(() => {
+  const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
   }, [messages]);
 
   const formatResponse = (response: string): string => {
@@ -41,6 +46,7 @@ export const Chat = () => {
   };
 
   const onClick = async (e: React.FormEvent) => {
+    setLoading(true);
     e.preventDefault();
     if (message.trim() === '') return;
 
@@ -69,6 +75,7 @@ export const Chat = () => {
       console.error('Error sending message:', error);
     }
 
+    setLoading(false);
     setMessage('');
   };
 
@@ -81,23 +88,23 @@ export const Chat = () => {
   };
 
   return (
-    <Box
-      display="flex"
+    <Flex
       flexDirection="column"
+      mb={4}
       p={4}
+      maxHeight="60vh"
       borderWidth={1}
       borderRadius="lg"
     >
-      <VStack spacing={4} align="stretch" flex="1" overflowY="auto">
+      <VStack spacing={4} align="stretch" flex="1" overflowY="auto" pr={2}>
         {messages.map((msg, index) => (
           <HStack
             key={index}
             alignSelf={msg.sender === 'user' ? 'flex-end' : 'flex-start'}
-            bg={msg.sender === 'user' ? 'teal.500' : 'gray.200'}
+            bg={msg.sender === 'user' ? 'gray.500' : 'gray.200'}
             color={msg.sender === 'user' ? 'white' : 'black'}
             p={3}
             borderRadius="md"
-            maxWidth="80%"
           >
             {msg.sender === 'assistant' && (
               <Avatar name="Assistant" src="/path/to/avatar.png" mr={2} />
@@ -133,6 +140,11 @@ export const Chat = () => {
             </Box>
           </HStack>
         ))}
+        {loading && (
+          <HStack alignSelf="center">
+            <Progress size="lg" isIndeterminate />
+          </HStack>
+        )}
         <div ref={messagesEndRef} />
       </VStack>
       <Divider my={4} />
@@ -145,12 +157,11 @@ export const Chat = () => {
           isDisabled={loading}
         />
         <HStack>
-          <Button onClick={onClick} colorScheme="teal" isLoading={loading}>
+          <Button onClick={onClick} colorScheme="primary" isLoading={loading}>
             Ask
           </Button>
         </HStack>
-        {loading && <Spinner size="lg" alignSelf="center" />}
       </VStack>
-    </Box>
+    </Flex>
   );
 };

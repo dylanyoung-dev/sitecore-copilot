@@ -10,7 +10,6 @@ export const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
   const [clients, setClients] = useState<ClientData[]>(() => {
     if (typeof window !== 'undefined' && window.sessionStorage) {
       const storedClients = sessionStorage.getItem('clients');
-      console.log('storedClients', storedClients);
       return storedClients ? JSON.parse(storedClients) : [];
     }
     return [];
@@ -18,7 +17,6 @@ export const ClientProvider: FC<ClientProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.sessionStorage) {
-      console.log('Updating clients in session storage', clients);
       window.sessionStorage.setItem('clients', JSON.stringify(clients));
     }
   }, [clients]);
