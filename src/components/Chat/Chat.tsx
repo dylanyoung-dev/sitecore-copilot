@@ -1,4 +1,5 @@
 'use client';
+import { useClientContext } from '@/context/ClientContext';
 import {
   Avatar,
   Box,
@@ -20,6 +21,7 @@ interface Message {
 }
 
 export const Chat = () => {
+  const { clients } = useClientContext();
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -56,7 +58,7 @@ export const Chat = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message, messages }),
+        body: JSON.stringify({ message, messages, clients }),
       });
 
       if (!response.ok) {

@@ -1,9 +1,12 @@
+import { ClientData } from '@/context/ClientContext';
+import { ProductOptions } from '@/model/ProductOptions';
 import { CreateExperienceSchema } from 'sitecore-personalize-tenant-sdk';
 
 const jsonSchema = CreateExperienceSchema;
 
-export const PersonalizeExperienceCreateTool = {
+export const PersonalizeExperienceCreateTool = (clients: ClientData[]) => ({
   type: 'function' as const,
+  product: ProductOptions.PersonalizeCDP,
   function: {
     name: 'create_personalization_experience',
     type: 'function',
@@ -15,11 +18,6 @@ export const PersonalizeExperienceCreateTool = {
         name: {
           type: 'string',
           description: 'The name of the personalization experience.',
-        },
-        friendlyId: {
-          type: 'string',
-          description:
-            'A friendly identifier for the experience that can be generated from the name, using a regex pattern of ^[a-z0-9_]*$.',
         },
         type: {
           type: 'string',
@@ -44,13 +42,15 @@ export const PersonalizeExperienceCreateTool = {
       },
       required: ['name', 'type', 'channels'],
     },
-    function: createPersonalizationExperience,
+    function: (args: { params: any }) =>
+      createPersonalizationExperience(args, clients),
     parse: JSON.parse,
   },
-};
+});
 
 export const PersonalizeListofExperiences = {
   type: 'function' as const,
+  product: ProductOptions.PersonalizeCDP,
   function: {
     name: 'list_personalization_experiences_experiments',
     type: 'function',
@@ -71,8 +71,29 @@ export const PersonalizeListofExperiences = {
   },
 };
 
-async function createPersonalizationExperience(args: { params: any }) {
+async function createPersonalizationExperience(
+  args: { params: any },
+  clients: ClientData[]
+) {
   console.log('Creating personalization experience:', args.params);
+  console.log('Creating personalization experience:', clients);
+
+  // const personalizeClient = new Client({
+  //   clientId: 'your-client-id',
+  //   clientSecret: 'your'
+  // });
+
+  // const experience: IFlowDefinition = {
+  //   name,
+  //   friendlyId,
+  //   type,
+  //   channels,
+  // };
+
+  let response = await console.log(
+    'Creating personalization experience:',
+    args.params
+  );
   return {
     status: 'success',
     message: 'Personalization experience created successfully.',

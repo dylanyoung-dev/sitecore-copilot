@@ -1,3 +1,4 @@
+import { ClientData } from '@/context/ClientContext';
 import {
   PersonalizeExperienceCreateTool,
   PersonalizeListofExperiences,
@@ -13,16 +14,21 @@ interface Message {
   content: string;
 }
 
+interface ChatRequest {
+  message: string;
+  messages: Message[];
+  clients: ClientData[];
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { message, messages }: { message: string; messages: Message[] } =
-      await req.json();
+    const { message, messages, clients }: ChatRequest = await req.json();
 
     const combinedMessages: ChatCompletionMessageParam[] = [
       {
         role: 'system',
         content:
-          'You are the Sitecore Assistant which will help users create Sitecore assets in the Sitecore SaaS products.',
+          'You are the Sitecore Assistant which will help users create Sitecore assets in the Sitecore SaaS products.  When running Sitecore Personalize apis that require code, always use EcmaScript 5.0 javascript that would work with Server Side Nashorn Javascript Engine.',
       },
       ...messages.map((msg) => ({
         role: msg.sender,
@@ -31,11 +37,16 @@ export async function POST(req: NextRequest) {
       { role: 'user', content: message },
     ];
 
+    console.log({ clients });
+
     const runner = await client.beta.chat.completions
       .runTools({
         model: 'gpt-4o-mini',
         messages: combinedMessages,
-        tools: [PersonalizeExperienceCreateTool, PersonalizeListofExperiences],
+        tools: [
+          PersonalizeExperienceCreateTool(clients),
+          PersonalizeListofExperiences,
+        ],
       })
       .on('message', (message) => {
         console.log(message);
