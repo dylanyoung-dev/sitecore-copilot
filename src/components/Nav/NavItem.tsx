@@ -28,7 +28,9 @@ export const NavItem: FC<NavItemProps> = ({
     borderRadius="md"
   >
     {icon && <Box mr="3">{icon}</Box>}
-    <Text flex="1">{label}</Text>
+    <Text flex="1" fontSize="lg">
+      {label}
+    </Text>
     {endElement}
   </Flex>
 );

@@ -26,7 +26,11 @@ export const LeftNavigation: FC<LeftNavigationProps> = () => {
         {/* <AccountSwitcher /> */}
         <Stack spacing="8" flex="1" overflow="auto" pt="8">
           <Stack spacing="1">
-            <NavLinkItem href="/" icon={<BiHome />} label="Get Started" />
+            <NavLinkItem
+              href="/"
+              icon={<BiHome fontSize="20px" />}
+              label="Get Started"
+            />
           </Stack>
 
           {clientContext?.clients?.find(

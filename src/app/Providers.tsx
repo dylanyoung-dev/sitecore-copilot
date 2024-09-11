@@ -1,5 +1,8 @@
 'use client';
 
+import '@fontsource-variable/open-sans';
+import '@fontsource-variable/spline-sans';
+
 import { ClientProvider } from '@/providers/ClientCredentials';
 import { CacheProvider } from '@chakra-ui/next-js';
 import { ChakraProvider } from '@chakra-ui/react';
