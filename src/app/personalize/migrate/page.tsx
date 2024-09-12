@@ -1,7 +1,7 @@
 export default function PersonalizeRecipesPage() {
   return (
     <div>
-      <h1>Existing Recipes</h1>
+      <h1>Migrate Tenant Assets</h1>
     </div>
   );
 }

@@ -31,23 +31,37 @@ export const LeftNavigation: FC<LeftNavigationProps> = () => {
               icon={<BiHome fontSize="20px" />}
               label="Get Started"
             />
+            <NavLinkItem
+              href="/marketplace"
+              icon={<BiCreditCard fontSize="20px" />}
+              label="Marketplace"
+            />
           </Stack>
-
           {clientContext?.clients?.find(
             (client) => client.product === ProductOptions.XMCloud
           ) && (
-            <NavGroup label="XM Cloud">
-              <NavLinkItem href="" icon={<BiUserCircle />} label="Recipes" />
-              <NavItem icon={<BiCreditCard />} label="Marketplace" />
+            <NavGroup label="XM Cloud: Content">
+              <NavLinkItem
+                href=""
+                icon={<BiUserCircle fontSize="20px" />}
+                label="Recipes"
+              />
+              <NavItem
+                icon={<BiCreditCard fontSize="20px" />}
+                label="Marketplace"
+              />
             </NavGroup>
           )}
-
+          // TODO Add XM Cloud Forms, Components, CH1 etc.
           {clientContext?.clients?.find(
             (client) => client.product === ProductOptions.PersonalizeCDP
           ) && (
             <NavGroup label="CDP & Personalize">
-              <NavLinkItem href="" icon={<BiUserCircle />} label="Recipes" />
-              <NavItem icon={<BiCreditCard />} label="Marketplace" />
+              <NavLinkItem
+                href="/personalize/migrate"
+                icon={<BiUserCircle fontSize="20px" />}
+                label="Migrate Assets"
+              />
             </NavGroup>
           )}
         </Stack>
@@ -55,13 +69,13 @@ export const LeftNavigation: FC<LeftNavigationProps> = () => {
           <Stack spacing="1">
             <NavLinkItem
               subtle
-              icon={<BiCog />}
+              icon={<BiCog fontSize="20px" />}
               href="/settings"
               label="Settings"
             />
             <NavItem
               subtle
-              icon={<BiBuoy />}
+              icon={<BiBuoy fontSize="20px" />}
               label="Help & Support"
               endElement={<Circle size="2" bg="blue.400" />}
             />
