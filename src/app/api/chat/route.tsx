@@ -1,5 +1,8 @@
 import { ClientData } from '@/context/ClientContext';
-import { PersonalizeExperienceCreateTool } from '@/tools/Sitecore';
+import {
+  PersonalizeExperienceCreateTool,
+  PersonalizeGetFlowsTool,
+} from '@/tools/Sitecore';
 import { NextRequest, NextResponse } from 'next/server';
 import { OpenAI } from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
@@ -40,7 +43,10 @@ export async function POST(req: NextRequest) {
       .runTools({
         model: 'gpt-4o-mini',
         messages: combinedMessages,
-        tools: [PersonalizeExperienceCreateTool(clients)],
+        tools: [
+          PersonalizeExperienceCreateTool(clients),
+          PersonalizeGetFlowsTool(clients),
+        ],
       })
       .on('message', (message) => {
         console.log(message);

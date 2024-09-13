@@ -70,28 +70,61 @@ export const PersonalizeExperienceCreateTool = (clients: ClientData[]) => ({
   },
 });
 
-// export const PersonalizeListofExperiences = {
-//   type: 'function' as const,
-//   product: ProductOptions.PersonalizeCDP,
-//   function: {
-//     name: 'list_personalization_experiences_experiments',
-//     type: 'function',
-//     description:
-//       'Get back a list of Experiences or Experiments depending on the type of flow you would like to see',
-//     parameters: {
-//       type: 'object',
-//       properties: {
-//         ref: {
-//           type: 'string',
-//           description:
-//             'You can optionally pass a reference or just get a full list',
-//         },
-//       },
-//     },
-//     function: getFlows,
-//     parse: JSON.parse,
-//   },
-// };
+export const PersonalizeListofExperiencesTool = (clients: ClientData[]) => ({
+  type: 'function' as const,
+  product: ProductOptions.PersonalizeCDP,
+  function: {
+    name: 'list_personalization_experiences',
+    type: 'function',
+    description:
+      'Lists all personalization experiences in Sitecore Personalize.',
+    parameters: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          description: 'The name of the personalization experience.',
+        },
+        type: {
+          type: 'string',
+          enum: ['Web', 'API', 'Triggered'],
+          description: 'The type of the experience.',
+        },
+      },
+      required: ['name', 'type', 'channels'],
+    },
+    function: async (args: { params: any }, runner: any) => {
+      createPersonalizationExperience(args, clients);
+    },
+    parse: JSON.parse,
+  },
+});
+
+export const PersonalizeGetFlowsTool = (clients: ClientData[]) => ({
+  type: 'function' as const,
+  product: ProductOptions.PersonalizeCDP,
+  function: {
+    name: 'get_experience_experiment_definition',
+    type: 'function',
+    description:
+      'Gets the definition of a personalization experience or experiment in Sitecore Personalize.',
+    parameters: {
+      type: 'object',
+      properties: {
+        ref: {
+          type: 'string',
+          description:
+            'The reference (or Unique Identifier - Typically a Guid) of the personalization experience or experiment.',
+        },
+      },
+      required: ['ref'],
+    },
+    function: async (args: { params: any }, runner: any) => {
+      getFlows(args, clients);
+    },
+    parse: JSON.parse,
+  },
+});
 
 async function createPersonalizationExperience(
   args: any,
@@ -190,15 +223,44 @@ const mapFlowType = (type: string): FlowType | undefined => {
   return response;
 };
 
-async function getFlows(args: { params: any }) {
-  console.log('here is a list for {dfkdfjlk}');
-  return {
-    status: 'success',
-    experiences: [
-      {
-        name: 'Experience 1',
-        friendlyId: 'experience_1',
-      },
-    ],
-  };
+async function getFlows(args: any, clients: ClientData[]) {
+  let personalizeClient;
+  if (args !== undefined && clients !== undefined) {
+    const clientDetails = clients.find(
+      (client) => (client.product = ProductOptions.PersonalizeCDP)
+    );
+
+    if (!clientDetails) {
+      return {
+        status: 'error',
+        message:
+          'You must have a client configured for Personalize/CDP to create an experience.',
+      };
+    }
+
+    personalizeClient = new Client({
+      clientId: clientDetails.clientId,
+      clientSecret: clientDetails.clientSecret,
+      region: RegionOptions.EU,
+    } as IClientInitOptions);
+
+    console.log(args);
+
+    try {
+      let response = await personalizeClient.Flows.GetByRef(args.ref);
+
+      console.log('Getting Flow Definition:', response);
+
+      return {
+        status: 'success',
+        message: 'Found your experience or experiment successfully.',
+        data: response,
+      };
+    } catch (error: any) {
+      return {
+        status: 'error',
+        message: `Failed to create personalization experience: ${error.message}`,
+      };
+    }
+  }
 }
