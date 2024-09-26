@@ -1,8 +1,5 @@
 import { ClientData } from '@/context/ClientContext';
-import {
-  PersonalizeExperienceCreateTool,
-  PersonalizeGetFlowsTool,
-} from '@/tools/Sitecore';
+import { CreateExperienceTool, GetFlowsTool, ListOfExperiencesTool } from '@/tools/Sitecore';
 import { NextRequest, NextResponse } from 'next/server';
 import { OpenAI } from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
@@ -43,10 +40,7 @@ export async function POST(req: NextRequest) {
       .runTools({
         model: 'gpt-4o-mini',
         messages: combinedMessages,
-        tools: [
-          PersonalizeExperienceCreateTool(clients),
-          PersonalizeGetFlowsTool(clients),
-        ],
+        tools: [await CreateExperienceTool(clients), await GetFlowsTool(clients), await ListOfExperiencesTool(clients)],
       })
       .on('message', (message) => {
         console.log(message);
@@ -57,9 +51,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: finalContent });
   } catch (error) {
     console.error('Error generating AI Response:', error);
-    return NextResponse.json(
-      { error: 'Error generating AI Response' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error generating AI Response' }, { status: 500 });
   }
 }

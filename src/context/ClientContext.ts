@@ -7,6 +7,17 @@ export interface ClientData {
   organizationId: string;
   clientId: string;
   clientSecret: string;
+  region?: string;
+  environment: EnvironmentOptions;
+}
+
+// Hard Coded for now, but would be cool to define
+export enum EnvironmentOptions {
+  Local = 'Local',
+  Dev = 'Development',
+  QA = 'QA',
+  UAT = 'UAT',
+  Production = 'Production',
 }
 
 export interface ClientContextType {

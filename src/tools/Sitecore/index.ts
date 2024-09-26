@@ -1,1 +1,1 @@
-export * from "./Personalize";
+export * from './Personalize';

@@ -1,8 +1,9 @@
 'use client';
 
-import { useClientContext } from '@/context/ClientContext';
+import { EnvironmentOptions, useClientContext } from '@/context/ClientContext';
 import { ProductOptions } from '@/model/ProductOptions';
 import {
+  Badge,
   Box,
   Button,
   Divider,
@@ -36,10 +37,12 @@ interface ClientListProps {}
 export const ClientList: FC<ClientListProps> = () => {
   const { clients, addClient, updateClient, removeClient } = useClientContext();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const productRef = useRef<HTMLSelectElement>(null);
+  const [selectedProduct, setSelectedProduct] = useState<string>();
   const organizationRef = useRef<HTMLInputElement>(null);
   const clientIdRef = useRef<HTMLInputElement>(null);
   const clientSecretRef = useRef<HTMLInputElement>(null);
+  const regionRef = useRef<HTMLSelectElement>(null);
+  const environmentRef = useRef<HTMLSelectElement>(null);
   const [editingClient, setEditingClient] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,12 +51,15 @@ export const ClientList: FC<ClientListProps> = () => {
       console.log('client', client);
       if (client) {
         setTimeout(() => {
-          if (productRef.current) productRef.current.value = client.product;
+          if (selectedProduct) setSelectedProduct(client.product);
           if (organizationRef.current)
             organizationRef.current.value = client.organizationId;
           if (clientIdRef.current) clientIdRef.current.value = client.clientId;
           if (clientSecretRef.current)
             clientSecretRef.current.value = client.clientSecret;
+          if (regionRef.current) regionRef.current.value = client.region || '';
+          if (environmentRef.current)
+            environmentRef.current.value = client.environment || '';
         }, 0);
       }
     }
@@ -61,10 +67,12 @@ export const ClientList: FC<ClientListProps> = () => {
 
   const handleSubmit = () => {
     const product =
-      (productRef.current?.value as ProductOptions) || ProductOptions.XMCloud;
+      (selectedProduct as ProductOptions) || ProductOptions.XMCloud;
     const organizationId = organizationRef.current?.value || '';
     const clientId = clientIdRef.current?.value || '';
     const clientSecret = clientSecretRef.current?.value || '';
+    const region = regionRef.current?.value || '';
+    const environment = environmentRef.current?.value as EnvironmentOptions;
 
     if (editingClient !== null) {
       updateClient(clientId, {
@@ -72,9 +80,18 @@ export const ClientList: FC<ClientListProps> = () => {
         organizationId,
         clientId,
         clientSecret,
+        region,
+        environment,
       });
     } else {
-      addClient({ product, organizationId, clientId, clientSecret });
+      addClient({
+        product,
+        organizationId,
+        clientId,
+        clientSecret,
+        region,
+        environment,
+      });
     }
 
     onClose();
@@ -88,6 +105,10 @@ export const ClientList: FC<ClientListProps> = () => {
   const handleEdit = (clientId: string) => {
     setEditingClient(clientId);
     onOpen();
+  };
+
+  const handleProductChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedProduct(event.target.value);
   };
 
   return (
@@ -109,7 +130,10 @@ export const ClientList: FC<ClientListProps> = () => {
           >
             <Flex justify="space-between" align="center">
               <Box>
-                <Text fontWeight="bold">{client.product}</Text>
+                <Text fontWeight="bold">
+                  {client.product}{' '}
+                  <Badge colorScheme="primary">{client.environment}</Badge>
+                </Text>
                 <Text>{client.organizationId}</Text>
               </Box>
               <HStack>
@@ -159,7 +183,10 @@ export const ClientList: FC<ClientListProps> = () => {
                     </Tooltip>
                   </HStack>
                 </FormLabel>
-                <Select placeholder="Select product" ref={productRef}>
+                <Select
+                  placeholder="Select product"
+                  onChange={handleProductChange}
+                >
                   {Object.values(ProductOptions).map((option) => (
                     <option key={option} value={option}>
                       {option}
@@ -167,6 +194,43 @@ export const ClientList: FC<ClientListProps> = () => {
                   ))}
                 </Select>
               </FormControl>
+              <FormControl id="environment">
+                <FormLabel>Environment</FormLabel>
+                <Select placeholder="Select environment" ref={environmentRef}>
+                  {Object.keys(EnvironmentOptions).map((key) => (
+                    <option
+                      key={key}
+                      value={
+                        EnvironmentOptions[
+                          key as keyof typeof EnvironmentOptions
+                        ]
+                      }
+                    >
+                      {key}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+              {selectedProduct === ProductOptions.PersonalizeCDP && (
+                <FormControl id="region">
+                  <FormLabel>
+                    <HStack alignItems="center">
+                      <FormLabel>Region</FormLabel>
+                      <Tooltip label="Select the region you are using.">
+                        <span>
+                          <BsInfoCircle fontSize="16px" />
+                        </span>
+                      </Tooltip>
+                    </HStack>
+                  </FormLabel>
+                  <Select placeholder="Select region" ref={regionRef}>
+                    <option value="us">US</option>
+                    <option value="eu">EU</option>
+                    <option value="ap">AP</option>
+                  </Select>
+                </FormControl>
+              )}
+
               <FormControl id="organizationId">
                 <FormLabel>
                   <Tooltip label="Enter your organization ID. More info at <Link href='https://example.com/organization-id' isExternal>Organization ID</Link>">
