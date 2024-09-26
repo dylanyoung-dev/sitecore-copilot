@@ -11,21 +11,15 @@ import {
   RegionOptions,
 } from 'sitecore-personalize-tenant-sdk';
 
-export const createPersonalizationExperience = async (
-  args: any,
-  clients: ClientData[]
-) => {
+export const createPersonalizationExperience = async (args: any, clients: ClientData[]) => {
   let personalizeClient;
   if (args !== undefined && clients !== undefined) {
-    const clientDetails = clients.find(
-      (client) => (client.product = ProductOptions.PersonalizeCDP)
-    );
+    const clientDetails = clients.find((client) => (client.product = ProductOptions.PersonalizeCDP));
 
     if (!clientDetails) {
       return {
         status: 'error',
-        message:
-          'You must have a client configured for Personalize/CDP to create an experience.',
+        message: 'You must have a client configured for Personalize/CDP to create an experience.',
       };
     }
 
@@ -50,9 +44,7 @@ export const createPersonalizationExperience = async (
       name: args.name,
       friendlyId: args.name.toLowerCase().replace(/\s+/g, '_'),
       type: flowTypeMapping,
-      channels: args.channels.map(
-        (channel: string) => FlowChannel[channel as keyof typeof FlowChannel]
-      ),
+      channels: args.channels.map((channel: string) => FlowChannel[channel as keyof typeof FlowChannel]),
       status: FlowStatus.Draft,
       schedule: {
         type: FlowScheduleType.Simple,
@@ -76,29 +68,22 @@ export const createPersonalizationExperience = async (
     }
   }
 
-  let response = await console.log(
-    'Creating personalization experience:',
-    args.params
-  );
+  let response = await console.log('Creating personalization experience:', args.params);
   return {
     status: 'fail',
-    message:
-      'Parameters are missing for creating a personalization experience.',
+    message: 'Parameters are missing for creating a personalization experience.',
   };
 };
 
 export const getFlows = async (args: any, clients: ClientData[]) => {
   let personalizeClient;
   if (args !== undefined && clients !== undefined) {
-    const clientDetails = clients.find(
-      (client) => (client.product = ProductOptions.PersonalizeCDP)
-    );
+    const clientDetails = clients.find((client) => (client.product = ProductOptions.PersonalizeCDP));
 
     if (!clientDetails) {
       return {
         status: 'error',
-        message:
-          'You must have a client configured for Personalize/CDP to create an experience.',
+        message: 'You must have a client configured for Personalize/CDP to create an experience.',
       };
     }
 
@@ -129,21 +114,15 @@ export const getFlows = async (args: any, clients: ClientData[]) => {
   }
 };
 
-export const listPersonalizationExperiences = async (
-  args: any,
-  clients: ClientData[]
-) => {
+export const listPersonalizationExperiences = async (args: any, clients: ClientData[]) => {
   let personalizeClient;
   if (args !== undefined && clients !== undefined) {
-    const clientDetails = clients.find(
-      (client: ClientData) => client.product === ProductOptions.PersonalizeCDP
-    );
+    const clientDetails = clients.find((client: ClientData) => client.product === ProductOptions.PersonalizeCDP);
 
     if (!clientDetails) {
       return {
         status: 'error',
-        message:
-          'You must have a client configured for Personalize/CDP to create an experience.',
+        message: 'You must have a client configured for Personalize/CDP to create an experience.',
       };
     }
 
@@ -166,7 +145,7 @@ export const listPersonalizationExperiences = async (
         data: response,
       };
 
-      console.log(result);
+      console.log('status', result);
 
       return result;
     } catch (error: any) {

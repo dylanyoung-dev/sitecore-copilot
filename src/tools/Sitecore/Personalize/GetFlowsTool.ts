@@ -8,8 +8,7 @@ export const GetFlowsTool = async (clients: ClientData[]) => ({
   function: {
     name: 'get_experience_experiment_definition',
     type: 'function',
-    description:
-      'Gets the definition of a personalization experience or experiment in Sitecore Personalize.',
+    description: 'Gets the definition of a personalization experience or experiment in Sitecore Personalize.',
     parameters: {
       type: 'object',
       properties: {
@@ -22,7 +21,7 @@ export const GetFlowsTool = async (clients: ClientData[]) => ({
       required: ['ref'],
     },
     function: async (args: { params: any }, runner: any) => {
-      await getFlows(args, clients);
+      return await getFlows(args, clients);
     },
     parse: JSON.parse,
   },

@@ -44,6 +44,9 @@ export async function POST(req: NextRequest) {
       })
       .on('message', (message) => {
         console.log(message);
+      })
+      .on('functionCallResult', (result) => {
+        console.log('result', result);
       });
 
     const finalContent = await runner.finalContent();

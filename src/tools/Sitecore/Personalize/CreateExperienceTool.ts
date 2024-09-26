@@ -42,7 +42,7 @@ export const CreateExperienceTool = async (clients: ClientData[]) => ({
       required: ['name', 'type', 'channels'],
     },
     function: async (args: { params: any }, runner: any) => {
-      await createPersonalizationExperience(args, clients);
+      return await createPersonalizationExperience(args, clients);
     },
     parse: JSON.parse,
   },
