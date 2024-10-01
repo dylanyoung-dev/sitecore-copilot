@@ -1,5 +1,5 @@
 'use client';
-import { useClientContext } from '@/context/ClientContext';
+import { ClientData, useClientContext } from '@/context/ClientContext';
 import {
   Avatar,
   Box,
@@ -9,27 +9,38 @@ import {
   HStack,
   Input,
   Progress,
+  Table,
+  Tbody,
+  Td,
   Text,
+  Th,
+  Thead,
+  Tr,
   VStack,
 } from '@chakra-ui/react';
-import { useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Message {
   sender: 'user' | 'assistant';
   content: string;
 }
 
-export const Chat = () => {
+interface ChatProps {
+  messages: Message[];
+}
+
+export const Chat: FC<ChatProps> = () => {
   const { clients } = useClientContext();
+  const [selectedClient, setSelectedClient] = useState<ClientData | null>(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'assistant',
-      content:
-        'Hello! How can I help you with your Sitecore environment today?',
+      content: 'Hello! How can I help you with your Sitecore environment today?',
     },
   ]);
 
@@ -90,14 +101,20 @@ export const Chat = () => {
   };
 
   return (
-    <Flex
-      flexDirection="column"
-      mb={4}
-      p={4}
-      maxHeight="60vh"
-      borderWidth={1}
-      borderRadius="lg"
-    >
+    <Flex flexDirection="column" mb={4} p={4} maxHeight="60vh" borderWidth={1} borderRadius="lg">
+      {/* <Select
+        placeholder="Select a client"
+        onChange={(e) => {
+          const client = clients.find((client) => client.clientId === e.target.value);
+          setSelectedClient(client || null);
+        }}
+      >
+        {clients.map((client: ClientData) => (
+          <option key={client.clientId} value={client.clientId}>
+            {client.product} - {client.clientId}
+          </option>
+        ))}
+      </Select> */}
       <VStack spacing={4} align="stretch" flex="1" overflowY="auto" pr={2}>
         {messages.map((msg, index) => (
           <HStack
@@ -108,14 +125,19 @@ export const Chat = () => {
             p={3}
             borderRadius="md"
           >
-            {msg.sender === 'assistant' && (
-              <Avatar name="Assistant" src="/path/to/avatar.png" mr={2} />
-            )}
+            {msg.sender === 'assistant' && <Avatar name="Assistant" src="/path/to/avatar.png" mr={2} />}
             <Box>
               {msg.sender === 'assistant' ? (
                 <Box p={2}>
                   <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
                     components={{
+                      table: ({ node, ...props }) => <Table variant="simple" my={2} {...props} border="1px solid" />,
+                      thead: ({ node, ...props }) => <Thead {...props} />,
+                      tbody: ({ node, ...props }) => <Tbody {...props} />,
+                      tr: ({ node, ...props }) => <Tr {...props}>{props.children}</Tr>,
+                      th: ({ node, ...props }) => <Th {...props} />,
+                      td: ({ node, ...props }) => <Td {...props} />,
                       ol: ({ children }) => (
                         <Box as="ol" pl={4} listStyleType="decimal" my={4}>
                           {children}
@@ -131,6 +153,7 @@ export const Chat = () => {
                           {children}
                         </Box>
                       ),
+                      p: ({ children }) => <Text>{children}</Text>,
                     }}
                   >
                     {msg.content}

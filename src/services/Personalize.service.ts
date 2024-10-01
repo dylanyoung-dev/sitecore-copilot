@@ -52,6 +52,24 @@ export const createPersonalizationExperience = async (args: any, clients: Client
       },
     };
 
+    // Check if any of the fields in assets are provided
+    if (args.assets && (args.assets.html || args.assets.javascript || args.assets.freemarker || args.assets.css)) {
+      experience.variants = [
+        {
+          name: 'Default Variant',
+          assets: {
+            html: args.assets.html || '',
+            js: args.assets.javascript || '',
+            css: args.assets.css || '',
+          },
+          templateVariables: {},
+          ...(args.assets.freemarker && {
+            tasks: [personalizeClient.Flows.CreateTemplateRenderTaskInput(args.assets.freemarker)],
+          }),
+        },
+      ];
+    }
+
     try {
       console.log('Creating personalization experience:', experience);
       let response = await personalizeClient.Flows.CreateExperience(experience);

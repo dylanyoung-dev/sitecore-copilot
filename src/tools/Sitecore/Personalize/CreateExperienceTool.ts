@@ -38,6 +38,29 @@ export const CreateExperienceTool = async (clients: ClientData[]) => ({
           },
           description: 'The channels for the experience.',
         },
+        assets: {
+          type: 'object',
+          properties: {
+            html: {
+              type: 'string',
+              description: 'The HTML content for the experience, use pure HTML only.',
+            },
+            css: {
+              type: 'string',
+              description: 'The CSS content for the experience, do not use precompiled CSS, only pure CSS.',
+            },
+            js: {
+              type: 'string',
+              description:
+                'The JS content for the experience which needs to use Nashorn Engine compatible ES5 Javascript.',
+            },
+            freemarker: {
+              type: 'string',
+              description:
+                'This is used to define the API response information using free marker syntax for the experience.',
+            },
+          },
+        },
       },
       required: ['name', 'type', 'channels'],
     },
