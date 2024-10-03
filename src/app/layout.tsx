@@ -3,6 +3,7 @@
 import { ChatModal } from '@/components/Chat/ChatModal';
 import { LeftNavigation } from '@/components/Nav/LeftNavigation';
 import { Box, Flex, useColorModeValue as mode } from '@chakra-ui/react';
+import 'highlight.js/styles/default.css';
 import { Providers } from './Providers';
 
 // export const metadata: Metadata = {

@@ -21,6 +21,7 @@ import {
 import { FC, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { CodeBlock } from '../CodeBlock/CodeBlock';
 
 interface Message {
   sender: 'user' | 'assistant';
@@ -138,6 +139,18 @@ export const Chat: FC<ChatProps> = () => {
                       tr: ({ node, ...props }) => <Tr {...props}>{props.children}</Tr>,
                       th: ({ node, ...props }) => <Th {...props} />,
                       td: ({ node, ...props }) => <Td {...props} />,
+                      code: ({ node, ...props }) => {
+                        const language = props.className?.replace('language-', '') || '';
+                        return !(props as any).inline ? (
+                          <Box my={4}>
+                            <CodeBlock code={String(props.children).trim()} language={language} />
+                          </Box>
+                        ) : (
+                          <Text as="code" bg="gray.100" p={1} borderRadius="md" {...props}>
+                            {props.children}
+                          </Text>
+                        );
+                      },
                       ol: ({ children }) => (
                         <Box as="ol" pl={4} listStyleType="decimal" my={4}>
                           {children}
