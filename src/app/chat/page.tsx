@@ -9,6 +9,14 @@ const ChatPage: FC<ChatPageProps> = () => {
   const { messages, input, handleInputChange, handleSubmit } = useChat();
   return (
     <div className="chat-container p-4 flex flex-col items-center h-screen">
+      <div className="welcome-box w-full max-w-2xl mb-4 p-4 rounded-lg bg-gray-200">
+        <h1 className="text-xl font-bold">Welcome to the Sitecore Assistant Chat</h1>
+        <p className="text-sm">
+          This chat is designed to assist you with creating Sitecore assets in the Sitecore SaaS products. Whether you
+          have questions, need guidance, or want to start a conversation, feel free to reach out. Our chat is powered by
+          advanced AI to provide you with the best possible support.
+        </p>
+      </div>
       <div className="messages flex-grow w-full max-w-2xl mb-4 overflow-y-auto">
         {messages.map((msg, index) => (
           <div key={index} className="message">
