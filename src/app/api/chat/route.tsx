@@ -1,6 +1,7 @@
 import { ClientData } from '@/context/ClientContext';
 import { openai } from '@ai-sdk/openai';
-import { convertToCoreMessages, streamText } from 'ai';
+import { convertToCoreMessages } from 'ai';
+import { streamUI } from 'ai/rsc';
 import { NextRequest } from 'next/server';
 
 interface Message {
@@ -19,12 +20,12 @@ export const maxDuration = 30;
 export async function POST(req: NextRequest) {
   const { messages } = await req.json();
 
-  const result = await streamText({
+  const result = await streamUI({
     model: openai('gpt-4o-mini'),
     messages: convertToCoreMessages(messages),
   });
 
-  return result.toDataStreamResponse();
+  return result;
 }
 
 // export async function POST(req: NextRequest) {
