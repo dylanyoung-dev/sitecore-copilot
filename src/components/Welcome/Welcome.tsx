@@ -1,18 +1,13 @@
-import { Button, Heading, Text } from '@chakra-ui/react';
+import { Button } from '../ui/button';
 
 export const Welcome = () => {
   return (
     <>
-      <Heading as="h2" size="md" mb={4}>
-        Welcome to Sitecore Assistant
-      </Heading>
-      <Text fontSize="lg" mb={4}>
-        This app is disabled until you configure a Sitecore connection client.
-        To get started click here:
-      </Text>
-      <Button as="a" href="/settings" ml={2}>
-        Sitecore Configuration
-      </Button>
+      <h2 className="text-lg font-semibold mb-4">Welcome to Sitecore Assistant</h2>
+      <p className="text-lg font-semibold mb-4">
+        This app is disabled until you configure a Sitecore connection client. To get started click here:
+      </p>
+      <Button className="ml-2">Sitecore Configuration</Button>
     </>
   );
 };

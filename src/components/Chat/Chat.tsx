@@ -29,7 +29,7 @@ interface Message {
 }
 
 interface ChatProps {
-  messages: Message[];
+  messages?: Message[];
 }
 
 export const Chat: FC<ChatProps> = () => {

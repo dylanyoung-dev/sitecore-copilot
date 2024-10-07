@@ -4,13 +4,5 @@ import { useClientContext } from '@/context/ClientContext';
 
 export default function Home() {
   const { clients } = useClientContext();
-  return (
-    <>
-      {!clients || clients.length === 0 ? (
-        <Welcome />
-      ) : (
-        <>Show Personalization Information</>
-      )}
-    </>
-  );
+  return <>{!clients || clients.length === 0 ? <Welcome /> : <>Show Personalization Information</>}</>;
 }

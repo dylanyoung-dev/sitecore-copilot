@@ -1,9 +1,6 @@
 'use client';
 
-import { ChatModal } from '@/components/Chat/ChatModal';
-import { LeftNavigation } from '@/components/Nav/LeftNavigation';
-import { Box, Flex, useColorModeValue as mode } from '@chakra-ui/react';
-import 'highlight.js/styles/default.css';
+import DashboardLayout from '@/components/DashboardLayout/DashboardLayout';
 import { Providers } from './Providers';
 
 // export const metadata: Metadata = {
@@ -20,19 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Providers>
-          <Box height="100vh" overflow="hidden" position="relative">
-            <Flex h="full" id="app-container">
-              <LeftNavigation />
-              <Box bg={mode('white', 'gray.800')} flex="1" p="6">
-                <Box w="full" h="full" rounded="lg">
-                  {children}
-                </Box>
-              </Box>
-            </Flex>
-
-            {/* Chat Modal Button */}
-            <ChatModal />
-          </Box>
+          <DashboardLayout>{children}</DashboardLayout>
         </Providers>
       </body>
     </html>
