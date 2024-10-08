@@ -1,8 +1,9 @@
 import { ClientData } from '@/context/ClientContext';
+import { CreateExperienceTool } from '@/tools/Sitecore';
 import { openai } from '@ai-sdk/openai';
 import { convertToCoreMessages } from 'ai';
 import { streamUI } from 'ai/rsc';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 interface Message {
   sender: 'user' | 'assistant';
@@ -17,15 +18,17 @@ interface ChatRequest {
 
 export const maxDuration = 30;
 
-export async function POST(req: NextRequest) {
-  const { messages } = await req.json();
+export async function POST(req: NextRequest, res: NextResponse) {
+  const { messages, clients } = await req.json();
 
   const result = await streamUI({
     model: openai('gpt-4o-mini'),
     messages: convertToCoreMessages(messages),
+    text: ({ content }) => <div>{content}</div>,
+    tools: { createExperience: CreateExperienceTool(clients) },
   });
 
-  return result;
+  return NextResponse.json(result);
 }
 
 // export async function POST(req: NextRequest) {

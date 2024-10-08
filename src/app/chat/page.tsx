@@ -32,24 +32,25 @@ const ChatPage: FC<ChatPageProps> = () => {
   };
 
   return (
-    <div className="chat-container p-4 flex h-screen relative">
+    <div className="chat-container p-4 flex h-screen">
       <div
         className={`messages-container flex-grow transition-all duration-500 ${
           isEditorOpen ? 'w-2/3' : 'w-full'
         } flex flex-col items-center`}
       >
-        <div
-          className={`welcome-box w-full max-w-4xl mb-4 p-10 rounded-lg bg-gray-100 transition-opacity duration-500 ${
-            showWelcome ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          <h1 className="text-xl font-bold mb-4">Welcome to the Sitecore Assistant Chat</h1>
-          <p className="text-md">
-            This chat is designed to assist you with creating Sitecore assets in the Sitecore SaaS products. Whether you
-            have questions, need guidance, or want to start a conversation, feel free to reach out. Our chat is powered
-            by advanced AI to provide you with the best possible support.
-          </p>
-        </div>
+        {showWelcome && (
+          <div
+            className={`welcome-box w-full max-w-4xl mb-4 p-10 rounded-lg bg-gray-100 transition-opacity duration-500`}
+          >
+            <h1 className="text-xl font-bold mb-4">Welcome to the Sitecore Assistant Chat</h1>
+            <p className="text-md">
+              This chat is designed to assist you with creating Sitecore assets in the Sitecore SaaS products. Whether
+              you have questions, need guidance, or want to start a conversation, feel free to reach out. Our chat is
+              powered by advanced AI to provide you with the best possible support.
+            </p>
+          </div>
+        )}
+
         <div className="messages flex-grow w-full max-w-2xl mb-4 overflow-y-auto">
           {messages.map((msg, index) => (
             <div key={index} className="message">
