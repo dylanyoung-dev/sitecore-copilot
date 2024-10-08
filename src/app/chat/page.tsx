@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useChat } from 'ai/react';
-import { ArrowUpRight, BotIcon, ChevronRight, Code, Loader, PanelRightClose, UserIcon } from 'lucide-react';
+import { ArrowUpRight, Brain, ChevronRight, CircleUser, Code, Loader, PanelRightClose } from 'lucide-react';
 import { FC, useState } from 'react';
 
 interface ChatPageProps {}
@@ -53,9 +53,9 @@ const ChatPage: FC<ChatPageProps> = () => {
             <div key={index} className="relative w-full mb-4">
               <div className="border absolute top-0 left-0 p-2 rounded-md">
                 {msg.role === 'user' ? (
-                  <UserIcon className="h-6 w-6 text-gray-900" />
+                  <CircleUser className="h-6 w-6 text-gray-500" />
                 ) : (
-                  <BotIcon className="h-6 w-6 text-green-500" />
+                  <Brain className="h-6 w-6 text-green-500" />
                 )}
               </div>
               <div className="message bg-gray-100 p-4 rounded-lg border ml-16">

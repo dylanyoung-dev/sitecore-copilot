@@ -20,14 +20,32 @@ export const maxDuration = 30;
 export async function POST(req: NextRequest, res: NextResponse) {
   const { messages, clients } = await req.json();
 
+  console.log({ messages, clients });
+
   const result = await streamText({
     model: openai('gpt-4o-mini'),
     messages: convertToCoreMessages(messages),
-
     tools: { createExperience: CreateExperienceTool(clients) },
+    system: `\
+      You are a friendly Sitecore Assistant that helps users create Sitecore assets.
+      
+      Here's the typical flow:
+       1. Determine the type of product the user wants to create assets
+       2. Suggestions on the inputs for the required products and the steps to create them
+       3. Provide an interface that is AI generated to help the user create the assets
+       4. Confirm the assets are correct and then create them.
+      \
+    `,
   });
 
-  return NextResponse.json(result);
+  for await (const delta of result.fullStream) {
+    const { type } = delta;
+
+    if (type === 'text-delta') {
+    }
+  }
+
+  return result.toDataStreamResponse();
 }
 
 // export async function POST(req: NextRequest) {
