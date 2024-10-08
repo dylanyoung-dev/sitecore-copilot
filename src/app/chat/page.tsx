@@ -1,7 +1,8 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { useChat } from 'ai/react';
-import { ChevronRight, Code, Loader } from 'lucide-react';
+import { ChevronRight, Code, Loader, PanelRightClose } from 'lucide-react';
 import { FC, useState } from 'react';
 
 interface ChatPageProps {}
@@ -32,12 +33,8 @@ const ChatPage: FC<ChatPageProps> = () => {
   };
 
   return (
-    <div className="chat-container p-4 flex h-screen">
-      <div
-        className={`messages-container flex-grow transition-all duration-500 ${
-          isEditorOpen ? 'w-2/3' : 'w-full'
-        } flex flex-col items-center`}
-      >
+    <div className="chat-container p-4 flex h-screen relative">
+      <div className={`messages-container ${isEditorOpen ? 'w-2/3' : 'w-full'} flex-col items-center flex`}>
         {showWelcome && (
           <div
             className={`welcome-box w-full max-w-4xl mb-4 p-10 rounded-lg bg-gray-100 transition-opacity duration-500`}
@@ -51,7 +48,7 @@ const ChatPage: FC<ChatPageProps> = () => {
           </div>
         )}
 
-        <div className="messages flex-grow w-full max-w-2xl mb-4 overflow-y-auto">
+        <div className="messages w-full flex-grow max-w-2xl mb-4 overflow-y-auto">
           {messages.map((msg, index) => (
             <div key={index} className="message">
               {msg.content}
@@ -74,36 +71,37 @@ const ChatPage: FC<ChatPageProps> = () => {
             <button
               type="submit"
               className={`chat-submit p-2 rounded-lg border ${
-                isLoading ? 'bg-gray-300 text-gray-600' : 'bg-gray-700 text-white'
+                isLoading ? 'bg-gray-300 text-gray-600' : 'bg-gray-700 text-white hover:bg-gray-600'
               }`}
               onClick={() => triggerSubmit}
               disabled={isLoading}
             >
-              {isLoading ? <Loader className="h-6 w-6 animate-spin" /> : <ChevronRight className="h-6 w-6" />}
+              {isLoading ? <Loader className="h-4 w-4 animate-spin" /> : <ChevronRight className="h-4 w-4 " />}
             </button>
-            <button type="button" onClick={toggleEditor} className="ml-2 p-2 rounded-lg border bg-gray-700 text-white">
-              <Code className="h-6 w-6" />
+            <button type="button" onClick={toggleEditor} className="ml-1 p-2 rounded-lg border bg-gray-700 text-white">
+              <Code className="h-4 w-4" />
             </button>
           </div>
         </form>
       </div>
-      <div
-        className={`editor-view fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg transition-transform duration-500 ${
-          isEditorOpen ? 'transform translate-x-0' : 'transform translate-x-full'
-        }`}
-      >
-        <div className="p-4">
-          <h2 className="text-xl font-bold mb-4">Editor View</h2>
-          <textarea className="w-full h-96 p-2 border rounded"></textarea>
-          <button
-            type="button"
-            onClick={toggleEditor}
-            className="mt-4 px-4 py-2 rounded-lg border bg-gray-700 text-white"
-          >
-            Close Editor
-          </button>
+      {isEditorOpen && (
+        <div className="editor-view fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg">
+          <div className="p-4 relative h-full flex flex-col justify-between">
+            <div>
+              <h2 className="text-xl font-bold mb-4">Editor View</h2>
+              <textarea className="w-full h-96 p-2 border rounded"></textarea>
+              <div className="flex justify-end">
+                <Button className="mt-4 px-4 py-2 rounded-lg border bg-gray-700 text-white">Update</Button>
+              </div>
+            </div>
+            <div className="flex justify-start">
+              <Button onClick={toggleEditor} className="p-2 text-white bg-gray-700 border">
+                <PanelRightClose className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
