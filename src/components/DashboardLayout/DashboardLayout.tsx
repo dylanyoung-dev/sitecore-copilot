@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, FileText, LayoutDashboard, Settings } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, Layers, LayoutDashboard, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -13,23 +13,28 @@ const navItems = [
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const pathname = usePathname();
 
   return (
     <div className="flex h-screen bg-black">
       <aside
-        className={`bg-black text-white transition-all duration-300 ease-in-out ${
+        className={`bg-gray-900 text-white transition-all duration-300 ease-in-out ${
           isCollapsed ? 'w-16' : 'w-64'
         } flex flex-col`}
       >
         <div className="flex items-center justify-between p-4">
           {!isCollapsed && (
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-                <span className="text-xl font-bold">S</span>
+              <div className="border border-white rounded-full h-10 w-10 flex items-center justify-center">
+                <Layers className="h-6 w-6" />
               </div>
               <span className="text-xl font-semibold">Assistant</span>
+            </div>
+          )}
+          {isCollapsed && (
+            <div className="flex items-center justify-center w-full">
+              <Layers className="h-6 w-6" />
             </div>
           )}
         </div>

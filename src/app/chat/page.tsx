@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useChat } from 'ai/react';
-import { ArrowUpRight, ChevronRight, Code, Loader, PanelRightClose } from 'lucide-react';
+import { ArrowUpRight, BotIcon, ChevronRight, Code, Loader, PanelRightClose, UserIcon } from 'lucide-react';
 import { FC, useState } from 'react';
 
 interface ChatPageProps {}
@@ -50,8 +50,17 @@ const ChatPage: FC<ChatPageProps> = () => {
 
         <div className="messages w-full flex-grow max-w-2xl mb-4 overflow-y-auto">
           {messages.map((msg, index) => (
-            <div key={index} className="message">
-              {msg.content}
+            <div key={index} className="relative w-full mb-4">
+              <div className="border absolute top-0 left-0 p-2 rounded-md">
+                {msg.role === 'user' ? (
+                  <UserIcon className="h-6 w-6 text-gray-900" />
+                ) : (
+                  <BotIcon className="h-6 w-6 text-green-500" />
+                )}
+              </div>
+              <div className="message bg-gray-100 p-4 rounded-lg border ml-16">
+                <span>{msg.content}</span>
+              </div>
             </div>
           ))}
         </div>

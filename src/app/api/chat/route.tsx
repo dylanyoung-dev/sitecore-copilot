@@ -1,8 +1,7 @@
 import { ClientData } from '@/context/ClientContext';
 import { CreateExperienceTool } from '@/tools/Sitecore';
 import { openai } from '@ai-sdk/openai';
-import { convertToCoreMessages } from 'ai';
-import { streamUI } from 'ai/rsc';
+import { convertToCoreMessages, streamText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface Message {
@@ -21,10 +20,10 @@ export const maxDuration = 30;
 export async function POST(req: NextRequest, res: NextResponse) {
   const { messages, clients } = await req.json();
 
-  const result = await streamUI({
+  const result = await streamText({
     model: openai('gpt-4o-mini'),
     messages: convertToCoreMessages(messages),
-    text: ({ content }) => <div>{content}</div>,
+
     tools: { createExperience: CreateExperienceTool(clients) },
   });
 
