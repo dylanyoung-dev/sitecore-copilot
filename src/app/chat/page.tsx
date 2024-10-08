@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useChat } from 'ai/react';
-import { ChevronRight, Code, Loader, PanelRightClose } from 'lucide-react';
+import { ArrowUpRight, ChevronRight, Code, Loader, PanelRightClose } from 'lucide-react';
 import { FC, useState } from 'react';
 
 interface ChatPageProps {}
@@ -67,20 +67,39 @@ const ChatPage: FC<ChatPageProps> = () => {
             className="chat-input w-full p-2 rounded mb-2 h-50 border-none bg-gray-100 resize-none focus:outline-none"
             placeholder="Ask the Sitecore Assistant to help you create assets in Sitecore..."
           ></textarea>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className={`chat-submit p-2 rounded-lg border ${
-                isLoading ? 'bg-gray-300 text-gray-600' : 'bg-gray-700 text-white hover:bg-gray-600'
-              }`}
-              onClick={() => triggerSubmit}
-              disabled={isLoading}
-            >
-              {isLoading ? <Loader className="h-4 w-4 animate-spin" /> : <ChevronRight className="h-4 w-4 " />}
-            </button>
-            <button type="button" onClick={toggleEditor} className="ml-1 p-2 rounded-lg border bg-gray-700 text-white">
-              <Code className="h-4 w-4" />
-            </button>
+          <div className="flex justify-between items-center">
+            <div className="flex space-x-2">
+              <Button
+                className="flex items-center p-2 rounded-lg bg-gray-100 border text-gray-700 hover:bg-gray-200"
+                onClick={() => {
+                  handleInputChange({
+                    target: { value: 'Create a personalized experience' },
+                  } as React.ChangeEvent<HTMLTextAreaElement>);
+                  triggerSubmit(new Event('submit') as unknown as React.FormEvent<HTMLFormElement>);
+                }}
+              >
+                Create a personalize experience <ArrowUpRight className="h-4 w-4 mr-1" />
+              </Button>
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className={`chat-submit p-2 rounded-lg border ${
+                  isLoading ? 'bg-gray-300 text-gray-600' : 'bg-gray-700 text-white hover:bg-gray-600'
+                }`}
+                onClick={() => triggerSubmit}
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader className="h-4 w-4 animate-spin" /> : <ChevronRight className="h-4 w-4 " />}
+              </button>
+              <button
+                type="button"
+                onClick={toggleEditor}
+                className="ml-1 p-2 rounded-lg border bg-gray-700 text-white"
+              >
+                <Code className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </form>
       </div>
