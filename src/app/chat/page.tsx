@@ -1,24 +1,24 @@
 'use client';
 
+import { CodeBlock } from '@/components/CodeBlock/CodeBlock';
 import { Button } from '@/components/ui/button';
 import { useChat } from 'ai/react';
 import { ArrowUpRight, Brain, ChevronRight, CircleUser, Code, Loader, PanelRightClose } from 'lucide-react';
 import { FC, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ChatPageProps {}
 
 const ChatPage: FC<ChatPageProps> = () => {
-  const { messages, input, handleInputChange, handleSubmit } = useChat();
-  const [isLoading, setIsLoading] = useState(false);
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat();
   const [showWelcome, setShowWelcome] = useState(true);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const triggerSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
     setShowWelcome(false);
     handleSubmit();
-    setIsLoading(false);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -59,10 +59,37 @@ const ChatPage: FC<ChatPageProps> = () => {
                 )}
               </div>
               <div className="message bg-gray-100 p-4 rounded-lg border ml-16">
-                <span>{msg.content}</span>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    table: ({ node, ...props }) => <table className="my-2 border border-gray-300" {...props} />,
+                    thead: ({ node, ...props }) => <thead {...props} />,
+                    tbody: ({ node, ...props }) => <tbody {...props} />,
+                    tr: ({ node, ...props }) => <tr {...props}>{props.children}</tr>,
+                    th: ({ node, ...props }) => <th {...props} />,
+                    td: ({ node, ...props }) => <td {...props} />,
+                    code: ({ node, ...props }) => {
+                      const language = props.className?.replace('language-', '') || '';
+                      return !(props as any).inline ? (
+                        <div className="my-4">
+                          <CodeBlock code={String(props.children).trim()} language={language} />
+                        </div>
+                      ) : (
+                        <code className="bg-gray-100 p-1 rounded-md">{props.children}</code>
+                      );
+                    },
+                    ol: ({ children }) => <ol className="pl-4 list-disc my-4">{children}</ol>,
+                    ul: ({ children }) => <ul className="pl-4 my-4">{children}</ul>,
+                    li: ({ children }) => <li className="mb-2 ml-4">{children}</li>,
+                    p: ({ children }) => <p>{children}</p>,
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
               </div>
             </div>
           ))}
+          {error && <div className="bg-red-100 p-2 rounded-lg border text-red-700">{error.message}</div>}
         </div>
 
         <form
