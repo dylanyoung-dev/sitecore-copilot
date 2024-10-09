@@ -116,6 +116,28 @@ const ChatPage: FC<ChatPageProps> = () => {
               >
                 Create a personalize experience <ArrowUpRight className="h-4 w-4 mr-1" />
               </Button>
+              <Button
+                className="flex items-center p-2 rounded-lg bg-gray-100 border text-gray-700 hover:bg-gray-200"
+                onClick={() => {
+                  handleInputChange({
+                    target: { value: 'Create content in XM Cloud' },
+                  } as React.ChangeEvent<HTMLTextAreaElement>);
+                  triggerSubmit(new Event('submit') as unknown as React.FormEvent<HTMLFormElement>);
+                }}
+              >
+                Create content in XM Cloud <ArrowUpRight className="h-4 w-4 mr-1" />
+              </Button>
+              <Button
+                className="flex items-center p-2 rounded-lg bg-gray-100 border text-gray-700 hover:bg-gray-200"
+                onClick={() => {
+                  handleInputChange({
+                    target: { value: 'Get a List of Experiences' },
+                  } as React.ChangeEvent<HTMLTextAreaElement>);
+                  triggerSubmit(new Event('submit') as unknown as React.FormEvent<HTMLFormElement>);
+                }}
+              >
+                Get a List of Experiences <ArrowUpRight className="h-4 w-4 mr-1" />
+              </Button>
             </div>
             <div className="flex justify-end">
               <button
