@@ -1,17 +1,14 @@
 import { ClientList } from '@/components/Clients/ClientList';
-import { Heading, Text } from '@chakra-ui/react';
 
 export default function Settings() {
   return (
     <>
-      <Heading as="h2" size="md" mb={4}>
-        Settings
-      </Heading>
-      <Text fontSize="lg" mb={4}>
-        Configure your Sitecore connection client.
-      </Text>
+      <div className="container mx-auto py-10">
+        <h1 className="text-2xl">Settings</h1>
+        <p className="text-medium mb-4">Configure your Sitecore connection client.</p>
 
-      <ClientList />
+        <ClientList />
+      </div>
     </>
   );
 }

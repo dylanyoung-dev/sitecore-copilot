@@ -4,7 +4,7 @@ import { CodeBlock } from '@/components/CodeBlock/CodeBlock';
 import { Button } from '@/components/ui/button';
 import { useChat } from 'ai/react';
 import { ArrowUpRight, Brain, ChevronRight, CircleUser, Code, Loader, PanelRightClose } from 'lucide-react';
-import { FC, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -12,6 +12,7 @@ interface ChatPageProps {}
 
 const ChatPage: FC<ChatPageProps> = () => {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showWelcome, setShowWelcome] = useState(true);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
