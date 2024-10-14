@@ -1,11 +1,12 @@
 import { ClientData, EnvironmentOptions } from '@/context/ClientContext';
 import { ProductOptions } from '@/model/ProductOptions';
-import { SelectItem } from '@radix-ui/react-select';
+import { SelectContent, SelectItem } from '@radix-ui/react-select';
 import { FC, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { FormItem, FormLabel } from '../ui/form';
 import { Input } from '../ui/input';
-import { Select } from '../ui/select';
+import { Select, SelectTrigger, SelectValue } from '../ui/select';
 
 interface ClientDialogProps {
   client: ClientData | null;
@@ -16,19 +17,19 @@ interface ClientDialogProps {
 
 export const ClientDialog: FC<ClientDialogProps> = ({ isOpen, onOpenChange, client, onSave }) => {
   const [selectedProduct, setSelectedProduct] = useState<string>();
+  const [selectedRegion, setSelectedRegion] = useState<string>();
+  const [selectedEnvironment, setSelectedEnvironment] = useState<string>();
   const organizationRef = useRef<HTMLInputElement>(null);
   const clientIdRef = useRef<HTMLInputElement>(null);
   const clientSecretRef = useRef<HTMLInputElement>(null);
-  const regionRef = useRef<HTMLSelectElement>(null);
-  const environmentRef = useRef<HTMLSelectElement>(null);
 
   const handleSave = () => {
     if (
       organizationRef.current &&
       clientIdRef.current &&
       clientSecretRef.current &&
-      regionRef.current &&
-      environmentRef.current
+      selectedRegion &&
+      selectedEnvironment
     ) {
       const updatedClient: ClientData = {
         //product: selectedProduct,
@@ -36,7 +37,7 @@ export const ClientDialog: FC<ClientDialogProps> = ({ isOpen, onOpenChange, clie
         organizationId: organizationRef.current.value,
         clientId: clientIdRef.current.value,
         clientSecret: clientSecretRef.current.value,
-        region: regionRef.current.value,
+        region: selectedRegion,
         environment: EnvironmentOptions.Dev,
         //environment: environmentRef.current.value,
       };
@@ -60,19 +61,29 @@ export const ClientDialog: FC<ClientDialogProps> = ({ isOpen, onOpenChange, clie
         <div className="grid gap-4 py-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Product</label>
-            <Select>
-              <SelectItem value="XMCloud">XM Cloud</SelectItem>
-              <SelectItem value="XMPlatform">XM Platform</SelectItem>
+            <Select onValueChange={setSelectedProduct}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Product" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="XMCloud">XM Cloud</SelectItem>
+                <SelectItem value="XMPlatform">XM Platform</SelectItem>
+              </SelectContent>
             </Select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Region</label>
-            <Select defaultValue={client?.region || ''}>
-              <SelectItem value="US">United States</SelectItem>
-              <SelectItem value="EU">Europe</SelectItem>
-              <SelectItem value="AP">Asia Pacific</SelectItem>
+          <FormItem>
+            <FormLabel>Region</FormLabel>
+            <Select onValueChange={setSelectedRegion} defaultValue={client?.region || ''}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Region" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="US">United States</SelectItem>
+                <SelectItem value="EU">Europe</SelectItem>
+                <SelectItem value="AP">Asia Pacific</SelectItem>
+              </SelectContent>
             </Select>
-          </div>
+          </FormItem>
           <div>
             <label className="block text-sm font-medium text-gray-700">Organization</label>
             <Input ref={organizationRef} defaultValue={client?.organizationId || ''} placeholder="Organization" />
@@ -80,8 +91,13 @@ export const ClientDialog: FC<ClientDialogProps> = ({ isOpen, onOpenChange, clie
           <div>
             <label className="block text-sm font-medium text-gray-700">Environment</label>
             <Select defaultValue={client?.environment || ''}>
-              <SelectItem value="dev">Development</SelectItem>
-              <SelectItem value="prod">Production</SelectItem>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Environment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="dev">Development</SelectItem>
+                <SelectItem value="prod">Production</SelectItem>
+              </SelectContent>
             </Select>
           </div>
           <div>
