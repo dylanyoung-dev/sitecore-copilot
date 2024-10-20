@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "overrides": {
+    "@radix-ui/react-dismissable-layer": "1.1.0",
+    "@radix-ui/react-focus-scope": "1.1.0"
+  },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.66",
     "@fontsource-variable/open-sans": "^5.0.31",
