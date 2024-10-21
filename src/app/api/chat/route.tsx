@@ -1,35 +1,46 @@
 import { ClientData } from '@/context/ClientContext';
-import { CreateExperienceTool, GenerateExperienceTool } from '@/tools/Sitecore/Personalize';
+import { PreviewExperienceTool } from '@/tools/Sitecore/Personalize';
 import { openai } from '@ai-sdk/openai';
-import { convertToCoreMessages, streamText } from 'ai';
+import { convertToCoreMessages, Message, streamText } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
 
-interface Message {
-  sender: 'user' | 'assistant';
-  content: string;
-}
-
 interface ChatRequest {
-  message: string;
-  messages: Message[];
+  messages: Array<Message>;
   clients: ClientData[];
 }
 
 export const maxDuration = 30;
 
+const productMapping = {
+  experience: 'Sitecore Personalize',
+  // Add other mappings as needed
+};
+
 export async function POST(req: NextRequest, res: NextResponse) {
-  const { messages, clients } = await req.json();
+  const { messages, clients }: ChatRequest = await req.json();
 
   const result = await streamText({
     model: openai('gpt-4o-mini'),
     maxSteps: 10,
     messages: convertToCoreMessages(messages),
-    tools: { createExperience: CreateExperienceTool(clients), generateExperience: GenerateExperienceTool() },
+    tools: {
+      // createPersonalizeExperience: CreateExperienceTool(clients),
+      previewPersonalizeExperience: PreviewExperienceTool(clients),
+    },
     system: `\
-      You are a friendly Sitecore Assistant that helps users create Sitecore assets.
+      You are a friendly Sitecore Assistant that helps users create and manage Sitecore assets.
 
-      1. Before saving/creating an experience, you'll work to define the variant assets.
-      2. You'll get the required details and then create the experience.
+      - ask follow up questions to nudge user into the optimal flow
+
+      Creating Assets has the following Flow:
+      - Determine the Sitecore Product the user wants to work with.
+      - Provide a Preview of what the user wants to create. Any Html, CSS, JS should be suggested by the system, based on the general description of the needs.
+      - Provide confirmation of the assets and then create them.
+
+      Mapping of user intents to Sitecore Products:
+      ${Object.entries(productMapping)
+        .map(([key, value]) => `- "${key}" refers to "${value}"`)
+        .join('\n')}
       \
     `,
   });

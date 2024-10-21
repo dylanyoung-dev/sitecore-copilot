@@ -1,13 +1,13 @@
 import { ClientData, EnvironmentOptions } from '@/context/ClientContext';
 import { ProductOptions } from '@/model/ProductOptions';
-import { SelectContent, SelectItem } from '@radix-ui/react-select';
-import { FC, useRef, useState } from 'react';
+import { FC } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { FormItem, FormLabel } from '../ui/form';
 import { Input } from '../ui/input';
-import { Select, SelectTrigger, SelectValue } from '../ui/select';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface ClientDialogProps {
   client: ClientData | null;
@@ -16,14 +16,28 @@ interface ClientDialogProps {
   onSave: (client: ClientData) => void;
 }
 
-export const ClientDialog: FC<ClientDialogProps> = ({ isOpen, onOpenChange, client, onSave }) => {
-  const [selectedProduct, setSelectedProduct] = useState<string>();
-  const [selectedRegion, setSelectedRegion] = useState<string>();
-  const [selectedEnvironment, setSelectedEnvironment] = useState<string>();
-  const organizationRef = useRef<HTMLInputElement>(null);
-  const clientIdRef = useRef<HTMLInputElement>(null);
-  const clientSecretRef = useRef<HTMLInputElement>(null);
+const inputSchema = z
+  .object({
+    product: z.string().min(1, { message: 'Product is required' }),
+    clientId: z.string().min(1, { message: 'Client ID is required' }),
+    clientSecret: z.string().min(1, { message: 'Client Secret is required' }),
+    environment: z.string().min(1, { message: 'Environment is required' }),
+    region: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.product === ProductOptions.PersonalizeCDP) {
+        return data.region && data.region.length > 0;
+      }
+      return true;
+    },
+    {
+      message: 'Region is required when product is CDP/Personalize',
+      path: ['region'],
+    }
+  );
 
+export const ClientDialog: FC<ClientDialogProps> = ({ isOpen, onOpenChange, client, onSave }) => {
   const methods = useForm<ClientData>({
     defaultValues: {
       product: (client?.product as ProductOptions) || '',
@@ -38,89 +52,92 @@ export const ClientDialog: FC<ClientDialogProps> = ({ isOpen, onOpenChange, clie
   const { handleSubmit, setValue } = methods;
 
   const handleSave = (data: ClientData) => {
-    onSave(data);
-  };
+    const input = inputSchema.parse(data);
+    //console.log(input as ClientData);
 
-  const handleProductChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedProduct(event.target.value);
+    onSave(input as ClientData);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
           <DialogTitle>{client ? 'Edit Client' : 'Add Client'}</DialogTitle>
           <DialogDescription>
             {client ? 'Make changes to the client here.' : 'Add a new client here.'}
           </DialogDescription>
         </DialogHeader>
-        <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(handleSave)} className="grid gap-4 py-4">
-            <FormItem>
-              <FormLabel>Product/Feature</FormLabel>
-              <Select onValueChange={setSelectedProduct}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Product" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(ProductOptions).map((product) => (
-                    <SelectItem key={product} value={product}>
-                      {product}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-            <FormItem>
-              <FormLabel>Region</FormLabel>
-              <Select onValueChange={(value) => setValue('region', value)} defaultValue={client?.region || ''}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Region">{methods.watch('region') || 'Region'}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="US">United States</SelectItem>
-                  <SelectItem value="EU">Europe</SelectItem>
-                  <SelectItem value="AP">Asia Pacific</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
-            <FormItem>
-              <FormLabel>Organization</FormLabel>
-              <Input ref={organizationRef} defaultValue={client?.organizationId || ''} placeholder="Organization" />
-            </FormItem>
-            <FormItem>
-              <FormLabel>Environment</FormLabel>
-              <Select defaultValue={client?.environment || ''}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Environment" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.values(EnvironmentOptions).map((env) => (
-                    <SelectItem key={env} value={env}>
-                      {env}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormItem>
-            <FormItem>
-              <FormLabel className="block text-sm font-medium text-gray-700">Client ID</FormLabel>
-              <Input ref={clientIdRef} defaultValue={client?.clientId || ''} placeholder="Client ID" />
-            </FormItem>
-            <FormItem>
-              <FormLabel className="block text-sm font-medium text-gray-700">Client Secret</FormLabel>
-              <Input
-                ref={clientSecretRef}
-                defaultValue={client?.clientSecret || ''}
-                placeholder="Client Secret"
-                type="password"
-              />
-            </FormItem>
-          </form>
-        </FormProvider>
-        <DialogFooter>
-          <Button type="submit">Save changes</Button>
-        </DialogFooter>
+        <form onSubmit={handleSubmit(handleSave)}>
+          <FormProvider {...methods}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="selectedProduct">Product/Feature</Label>
+                <Select onValueChange={(value) => setValue('product', value as ProductOptions)}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select a Product/Feature" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(ProductOptions).map((product) => (
+                      <SelectItem value={product.toString()}>{product}</SelectItem>
+                    ))}
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {methods.watch('product') === ProductOptions.PersonalizeCDP && (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label>Region</Label>
+                  <Select onValueChange={(value) => setValue('region', value)}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Region">{methods.watch('region') || 'Region'}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="US">United States</SelectItem>
+                      <SelectItem value="EU">Europe</SelectItem>
+                      <SelectItem value="AP">Asia Pacific</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label>Organization</Label>
+                <Input className="col-span-3" {...methods.register('organizationId')} placeholder="Organization" />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label>Environment</Label>
+                <Select onValueChange={(value) => setValue('environment', value as EnvironmentOptions)}>
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Environment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(EnvironmentOptions).map((env) => (
+                      <SelectItem key={env} value={env}>
+                        {env}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="block text-sm font-medium text-gray-700">Client ID</Label>
+                <Input {...methods.register('clientId')} className="col-span-3" placeholder="Client ID" />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="block text-sm font-medium text-gray-700">Client Secret</Label>
+                <Input
+                  className="col-span-3"
+                  {...methods.register('clientSecret')}
+                  placeholder="Client Secret"
+                  type="password"
+                />
+              </div>
+            </div>
+          </FormProvider>
+          <DialogFooter>
+            <Button type="submit">Save changes</Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

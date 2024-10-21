@@ -1,26 +1,42 @@
 'use client';
 
-import { CodeBlock } from '@/components/CodeBlock/CodeBlock';
+import { ChatWelcome } from '@/components/Chat/ChatWelcome';
+import { MessageDisplay } from '@/components/Chat/MessageDisplay';
+import { useScrollToBottom } from '@/components/Chat/ScrollToBottom';
 import { Button } from '@/components/ui/button';
 import { useChat } from 'ai/react';
-import { ArrowUpRight, Brain, ChevronRight, CircleUser, Code, Loader, PanelRightClose } from 'lucide-react';
-import { FC, useRef, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { ArrowUpRight, ChevronRight, Code, Loader, PanelRightClose } from 'lucide-react';
+import { FC, useEffect, useState } from 'react';
 
 interface ChatPageProps {}
 
 const ChatPage: FC<ChatPageProps> = () => {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showWelcome, setShowWelcome] = useState(true);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+
+  const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
 
   const triggerSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setShowWelcome(false);
     handleSubmit();
   };
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.toolInvocations) {
+        const previewPersonalizeExperienceInvocation = lastMessage.toolInvocations.find(
+          (invocation) => invocation.toolName === 'previewPersonalizeExperience'
+        );
+
+        if (previewPersonalizeExperienceInvocation && previewPersonalizeExperienceInvocation.state === 'result') {
+          setIsEditorOpen(true);
+        }
+      }
+    }
+  }, [messages]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -36,61 +52,17 @@ const ChatPage: FC<ChatPageProps> = () => {
   return (
     <div className="chat-container p-4 flex h-screen relative">
       <div className={`messages-container ${isEditorOpen ? 'w-2/3' : 'w-full'} flex-col items-center flex`}>
-        {showWelcome && (
-          <div
-            className={`welcome-box w-full max-w-4xl mb-4 p-10 rounded-lg bg-gray-100 transition-opacity duration-500`}
-          >
-            <h1 className="text-xl font-bold mb-4">Welcome to the Sitecore Assistant Chat</h1>
-            <p className="text-md">
-              This chat is designed to assist you with creating Sitecore assets in the Sitecore SaaS products. Whether
-              you have questions, need guidance, or want to start a conversation, feel free to reach out. Our chat is
-              powered by advanced AI to provide you with the best possible support.
-            </p>
-          </div>
-        )}
+        {showWelcome && <ChatWelcome />}
 
-        <div className="messages w-full flex-grow max-w-2xl mb-4 overflow-y-auto">
-          {messages.map((msg, index) => (
-            <div key={index} className="relative w-full mb-4">
-              <div className="border absolute top-0 left-0 p-2 rounded-md">
-                {msg.role === 'user' ? (
-                  <CircleUser className="h-6 w-6 text-gray-500" />
-                ) : (
-                  <Brain className="h-6 w-6 text-green-500" />
-                )}
-              </div>
-              <div className="message bg-gray-100 p-4 rounded-lg border ml-16">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    table: ({ node, ...props }) => <table className="my-2 border border-gray-300" {...props} />,
-                    thead: ({ node, ...props }) => <thead {...props} />,
-                    tbody: ({ node, ...props }) => <tbody {...props} />,
-                    tr: ({ node, ...props }) => <tr {...props}>{props.children}</tr>,
-                    th: ({ node, ...props }) => <th {...props} />,
-                    td: ({ node, ...props }) => <td {...props} />,
-                    code: ({ node, ...props }) => {
-                      const language = props.className?.replace('language-', '') || '';
-                      return !(props as any).inline ? (
-                        <div className="my-4">
-                          <CodeBlock code={String(props.children).trim()} language={language} />
-                        </div>
-                      ) : (
-                        <code className="bg-gray-100 p-1 rounded-md">{props.children}</code>
-                      );
-                    },
-                    ol: ({ children }) => <ol className="pl-4 list-disc my-4">{children}</ol>,
-                    ul: ({ children }) => <ul className="pl-4 my-4">{children}</ul>,
-                    li: ({ children }) => <li className="mb-2 ml-4">{children}</li>,
-                    p: ({ children }) => <p>{children}</p>,
-                  }}
-                >
-                  {msg.content}
-                </ReactMarkdown>
-              </div>
-            </div>
-          ))}
+        <div className="messages w-full flex-grow max-w-2xl mb-4 overflow-y-auto" ref={messagesContainerRef}>
+          <MessageDisplay messages={messages} />
           {error && <div className="bg-red-100 p-2 rounded-lg border text-red-700">{error.message}</div>}
+          {isLoading && (
+            <div className="flex items-center justify-center">
+              <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6"></div>
+            </div>
+          )}
+          <div ref={messagesEndRef} className="shrink-0 min-w-[24px] min-h-[24px]" />
         </div>
 
         <form

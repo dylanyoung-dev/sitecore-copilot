@@ -29,6 +29,13 @@ export const ClientList: FC<ClientListProps> = () => {
   };
 
   const handleSaveClient = (updatedClient: ClientData) => {
+    if (editingClient) {
+      updateClient(updatedClient.clientId, updatedClient);
+    } else {
+      addClient(updatedClient);
+    }
+
+    setEditingClient(null);
     setIsDialogOpen(false);
   };
 
