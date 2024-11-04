@@ -31,7 +31,7 @@ const ChatPage: FC<ChatPageProps> = () => {
           (invocation) => invocation.toolName === 'previewPersonalizeExperience'
         );
 
-        if (previewPersonalizeExperienceInvocation && previewPersonalizeExperienceInvocation.state === 'result') {
+        if (previewPersonalizeExperienceInvocation) {
           setIsEditorOpen(true);
         }
       }
@@ -54,7 +54,10 @@ const ChatPage: FC<ChatPageProps> = () => {
       <div className={`messages-container ${isEditorOpen ? 'w-2/3' : 'w-full'} flex-col items-center flex`}>
         {showWelcome && <ChatWelcome />}
 
-        <div className="messages w-full flex-grow max-w-2xl mb-4 overflow-y-auto" ref={messagesContainerRef}>
+        <div
+          className="messages w-full flex-grow max-w-3xl mb-4 overflow-y-auto overflow-x-hidden"
+          ref={messagesContainerRef}
+        >
           <MessageDisplay messages={messages} />
           {error && <div className="bg-red-100 p-2 rounded-lg border text-red-700">{error.message}</div>}
           {isLoading && (

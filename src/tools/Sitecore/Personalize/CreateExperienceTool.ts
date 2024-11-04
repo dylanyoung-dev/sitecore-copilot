@@ -47,7 +47,7 @@ export const PreviewExperienceTool = (clients: ClientData[]) => {
         `,
       });
 
-      return { object };
+      return object;
     },
   });
 };
