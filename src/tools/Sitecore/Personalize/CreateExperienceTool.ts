@@ -49,7 +49,7 @@ export const CreateExperienceTool = async (clients: ClientData[]) => ({
               type: 'string',
               description: 'The CSS content for the experience, do not use precompiled CSS, only pure CSS.',
             },
-            js: {
+            javascript: {
               type: 'string',
               description:
                 'The JS content for the experience which needs to use Nashorn Engine compatible ES5 Javascript.',
