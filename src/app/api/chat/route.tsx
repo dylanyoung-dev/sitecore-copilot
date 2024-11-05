@@ -21,27 +21,21 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
   const result = await streamText({
     model: openai('gpt-4o-mini'),
-    maxSteps: 10,
     messages: convertToCoreMessages(messages),
     tools: {
       // createPersonalizeExperience: CreateExperienceTool(clients),
       previewPersonalizeExperience: PreviewExperienceTool(clients),
     },
     system: `\
-      You are a friendly Sitecore Assistant that helps users create and manage Sitecore assets.
+      You are a friendly Sitecore Assistant that helps users create experiences in Sitecore Personalize.
 
       - ask follow up questions to nudge user into the optimal flow
 
-      Creating Assets has the following Flow:
-      - Determine the Sitecore Product the user wants to work with.
-      - Provide a Preview of what the user wants to create. Any Html, CSS, JS should be suggested by the system, based on the general description of the needs.
-      - Provide confirmation of the assets and then create them.
-
-      Mapping of user intents to Sitecore Products:
-      ${Object.entries(productMapping)
-        .map(([key, value]) => `- "${key}" refers to "${value}"`)
-        .join('\n')}
-      \
+      Creating an Experience has the following Flow:
+      - Determine details about the Experience and create HTML, CSS, JS assets to allow the user to preview the Personalize Experience.
+      - Allow the user to make modifications to the experience details to improve the experience.
+      - Finally confirm the creation of the experience.
+      - Create the Experience in Sitecore Personalize.
     `,
   });
 
@@ -50,8 +44,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
   return result.toDataStreamResponse();
 }
 
-// Here's the typical flow:
-// 1. Determine the **Sitecore Product** the user wants to work with.
-// 2. Suggestions on the inputs for the required products and the steps to create them
-// 3. Provide an interface that is AI generated to help the user create the assets
-// 4. Confirm the assets are correct and then create them.
+// Add LangGraph to add multi-agent flows for Sitecore CDP, XMC, etc. (V3)
+// Add a tool that can create a new experience in Sitecore Personalize (V2)
+// Add a tool to allow a user to add or create a decision model in Sitecore Personalize (V2) - But only once they have started a flow to create an experience
+// Add a tool to allow them to select from existing recipes (a feature coming soon) in order to create custom recipes (V3)

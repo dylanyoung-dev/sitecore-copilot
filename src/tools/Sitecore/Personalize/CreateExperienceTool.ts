@@ -22,6 +22,8 @@ import { z } from 'zod';
 //   });
 // };
 
+// Could create a multi agent that handles Sitecore Personalize or CDP or XMC, using multi-agent using a tool like lang graph
+
 export const PreviewExperienceTool = (clients: ClientData[]) => {
   return tool({
     description: 'Preview a new Experience, where the system should suggest the assets based on the inputs.',
@@ -38,12 +40,15 @@ export const PreviewExperienceTool = (clients: ClientData[]) => {
             css: z.string(),
             js: z.string(),
           }),
+          //templateVars: z.record(z.string(), z.string()),
         }),
         prompt: `\
           Generate HTML, CSS, and JavaScript for the following experience description:
           "${description}"
 
-          All JavaScript must use EcmaScript 5 syntax that works with lashorn server side java engine.
+          ** Important Instructions **:
+          - All JavaScript must use EcmaScript 5 syntax that works with lashorn server side java engine.
+          - If the user asks for fields, fill those fields by default with ipsum lorem text, unless they specify otherwise.
         `,
       });
 

@@ -3,8 +3,9 @@ export default function MarketplacePage() {
     <div>
       <h1>Coming Soon</h1>
       <p>
-        Vision: Ability to deploy assets based on what clients you have configured, so maybe a Pattern and Profile Cards
-        Feature, that will allow you to deploy to both XMC and Personalize the necessary assets
+        Ideally it would be based on Git based repositories that use the Sitecore CDP/P Serializer, so you could define
+        the assets and use this app to deploy them to your tenant maybe? This feature will likely need a database, could
+        use a free tier of a cloud provider for now.
       </p>
       <p>This recipe library will is free for now.</p>
     </div>

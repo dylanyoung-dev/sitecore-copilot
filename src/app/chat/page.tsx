@@ -3,17 +3,28 @@
 import { ChatWelcome } from '@/components/Chat/ChatWelcome';
 import { MessageDisplay } from '@/components/Chat/MessageDisplay';
 import { useScrollToBottom } from '@/components/Chat/ScrollToBottom';
+import { PersonalizeEditorView } from '@/components/Personalize/PersonalizeEditorView';
 import { Button } from '@/components/ui/button';
 import { useChat } from 'ai/react';
-import { ArrowUpRight, ChevronRight, Code, Loader, PanelRightClose } from 'lucide-react';
+import { ArrowUpRight, ChevronRight, Code, Loader } from 'lucide-react';
 import { FC, useEffect, useState } from 'react';
 
 interface ChatPageProps {}
+
+export interface IPersonalizeCreateArgs {
+  assets: {
+    html: string;
+    css: string;
+    js: string;
+  };
+  //templateVars: Record<string, string>;
+}
 
 const ChatPage: FC<ChatPageProps> = () => {
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat();
   const [showWelcome, setShowWelcome] = useState(true);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [personalizeArgs, setPersonalizeArgs] = useState<IPersonalizeCreateArgs | undefined>();
 
   const [messagesContainerRef, messagesEndRef] = useScrollToBottom<HTMLDivElement>();
 
@@ -31,8 +42,10 @@ const ChatPage: FC<ChatPageProps> = () => {
           (invocation) => invocation.toolName === 'previewPersonalizeExperience'
         );
 
-        if (previewPersonalizeExperienceInvocation) {
+        if (previewPersonalizeExperienceInvocation && previewPersonalizeExperienceInvocation.state === 'result') {
           setIsEditorOpen(true);
+
+          console.log(JSON.stringify(previewPersonalizeExperienceInvocation.args, null, 2));
         }
       }
     }
@@ -137,24 +150,7 @@ const ChatPage: FC<ChatPageProps> = () => {
           </div>
         </form>
       </div>
-      {isEditorOpen && (
-        <div className="editor-view fixed top-0 right-0 h-full w-1/3 bg-white shadow-lg">
-          <div className="p-4 relative h-full flex flex-col justify-between">
-            <div>
-              <h2 className="text-xl font-bold mb-4">Editor View</h2>
-              <textarea className="w-full h-96 p-2 border rounded"></textarea>
-              <div className="flex justify-end">
-                <Button className="mt-4 px-4 py-2 rounded-lg border bg-gray-700 text-white">Update</Button>
-              </div>
-            </div>
-            <div className="flex justify-start">
-              <Button onClick={toggleEditor} className="p-2 text-white bg-gray-700 border">
-                <PanelRightClose className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {isEditorOpen && <PersonalizeEditorView toggleEditor={toggleEditor} results={personalizeArgs} />}
     </div>
   );
 };

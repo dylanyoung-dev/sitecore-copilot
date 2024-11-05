@@ -38,12 +38,7 @@ export const Chat: FC<ChatProps> = () => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      sender: 'assistant',
-      content: 'Hello! How can I help you with your Sitecore environment today?',
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
