@@ -1,0 +1,7 @@
+apiRoutes:
+  - id: 'xmc-edge-api'
+    product: 'XM Cloud'
+    fields:
+  - id: 'cdp-tenant-api'
+    product: 'CDP/Personalize'
+    fields:
