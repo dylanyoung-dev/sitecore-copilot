@@ -1,4 +1,4 @@
-import { enumInstanceType, IInstance } from '@/models/IInstance';
+import { IInstance } from '@/models/IInstance';
 import { MoreHorizontal, Trash2 } from 'lucide-react';
 import { FC, useState } from 'react';
 import {
@@ -65,10 +65,10 @@ export const ListingTable: FC<ListingTableProps> = ({ instances, onDelete }) => 
                 <TableRow key={instance.id}>
                   <TableCell className="font-medium">{instance.name}</TableCell>
                   <TableCell>
-                    <Badge className="bg-gray-500">{instance.instanceType as enumInstanceType}</Badge>
+                    <Badge className="bg-gray-500">In Progress</Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center">{instance.graphQlEndpoint}</div>
+                    <div className="flex items-center">{instance.endpoint}</div>
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>

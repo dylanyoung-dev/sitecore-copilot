@@ -1,4 +1,3 @@
-import { enumInstanceType } from '@/models/IInstance';
 import { GetSearchQuery } from './createGqlQuery';
 import { CreateQueryTemplate, UpdateQueryTemplate } from './updateTemplate.query';
 
@@ -103,7 +102,7 @@ export const GenerateContentExport = (
 };
 
 export const GetContentExportResults = async (
-  instanceType: enumInstanceType,
+  instanceType: any,
   gqlEndpoint?: string,
   gqlApiKey?: string,
   startItem?: string,
@@ -119,11 +118,11 @@ export const GetContentExportResults = async (
   }
 
   let headers = undefined;
-  if (instanceType === enumInstanceType.xmc) {
-    headers = new Headers({ Authorization: 'Bearer ' + gqlApiKey, 'content-type': 'application/json' });
-  } else {
-    headers = new Headers({ sc_apikey: gqlApiKey, 'content-type': 'application/json' });
-  }
+  //if (instanceType === instan.xmc) {
+  headers = new Headers({ Authorization: 'Bearer ' + gqlApiKey, 'content-type': 'application/json' });
+  // } else {
+  //   headers = new Headers({ sc_apikey: gqlApiKey, 'content-type': 'application/json' });
+  // }
 
   const result = await fetch(gqlEndpoint, {
     method: 'POST',

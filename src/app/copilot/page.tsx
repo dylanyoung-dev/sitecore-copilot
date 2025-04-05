@@ -62,7 +62,7 @@ export default function CopilotPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Content Copilot</BreadcrumbPage>
+                  <BreadcrumbPage>Copilot</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -77,7 +77,7 @@ export default function CopilotPage() {
               ) : (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground">
-                    Please configure an OpenAI API token in settings to use the Content Copilot.
+                    Please configure an OpenAI API token in settings to use the Copilot.
                   </p>
                 </div>
               )}

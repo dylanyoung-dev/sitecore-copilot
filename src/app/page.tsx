@@ -1,9 +1,6 @@
 'use client';
 
 import { AppSidebar } from '@/components/app-sidebar';
-import { ContentExportStats } from '@/components/stats/content-export';
-import { CopilotRequestStats } from '@/components/stats/copilot-requests';
-import { InstanceStats } from '@/components/stats/instance';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from '@/components/ui/breadcrumb';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Welcome } from '@/components/welcome';

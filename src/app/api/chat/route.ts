@@ -1,6 +1,5 @@
 import { IInstance } from '@/models/IInstance';
 import { IToken } from '@/models/IToken';
-import { GetContentExportResults } from '@/services/sitecore/contentExportToolUtil';
 import { createOpenAI } from '@ai-sdk/openai';
 import { streamText } from 'ai';
 import { z } from 'zod';
@@ -27,7 +26,7 @@ export async function POST(req: Request) {
   const systemPrompt = {
     role: 'system',
     content: `You are a Sitecore Content Operations expert assistant. 
-    You have access to the following Sitecore instance: ${instanceData.name} (${instanceData.instanceType}).
+    You have access to the following Sitecore instance: ${JSON.stringify(instanceData)}.
 
     Instructions
     - Always ask to confirm before running any functions
@@ -63,27 +62,16 @@ export async function POST(req: Request) {
               };
             }
 
-            const fnResult = await GetContentExportResults(
-              instanceData.instanceType,
-              instanceData.graphQlEndpoint,
-              instanceData.apiToken,
-              startItem,
-              templates,
-              fields
-            );
-
-            if (Array.isArray(fnResult) && fnResult.length > 100) {
-              return {
-                result: {
-                  data: fnResult.slice(0, 100),
-                  message: 'Results limited to first 100 items',
-                  total: fnResult.length,
-                },
-              };
-            }
-
+            // const fnResult = await GetContentExportResults(
+            //   instanceData.instanceType,
+            //   instanceData.graphQlEndpoint,
+            //   instanceData.apiToken,
+            //   startItem,
+            //   templates,
+            //   fields
+            // );
             return {
-              result: fnResult || { error: 'No content found' },
+              result: { error: 'This function is not implemented' },
             };
           } catch (error) {
             console.log(error);

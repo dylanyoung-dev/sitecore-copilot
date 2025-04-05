@@ -76,7 +76,7 @@ export default function TokenConfigPage() {
             <div className="p-6">
               <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">API Token Configuration</h1>
-                <Button onClick={() => setIsModalOpen(true)}>
+                <Button className="cursor-pointer" onClick={() => setIsModalOpen(true)}>
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Add Token
                 </Button>

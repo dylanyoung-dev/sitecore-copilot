@@ -2,8 +2,7 @@
 
 import { AppSidebar } from '@/components/app-sidebar';
 import { ListingTable } from '@/components/instances/listing-table';
-import { RegistrationGenModal } from '@/components/instances/registration-gen-modal';
-import { RegistrationTokenModal } from '@/components/instances/registration-token-modal';
+import { AddInstanceModal } from '@/components/instances/modals/add-instance';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,8 +13,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { enumInstanceType, IInstance } from '@/models/IInstance';
-import { getXmCloudToken } from '@/services/sitecore/getXmCloudToken';
+import { IInstance } from '@/models/IInstance';
 import { Separator } from '@radix-ui/react-separator';
 import { PlusCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -25,7 +23,7 @@ export default function InstanceSetupPage() {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('instances');
+      const saved = sessionStorage.getItem('instances');
       if (saved) {
         const parsedInstances = JSON.parse(saved) as IInstance[];
         setInstances(parsedInstances);
@@ -37,17 +35,18 @@ export default function InstanceSetupPage() {
 
   const [isGenModalOpen, setIsGenModalOpen] = useState(false);
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const handleAddInstance = async (newInstance: Omit<IInstance, 'id'>) => {
     try {
-      if (newInstance.instanceType === enumInstanceType.xmc) {
-        const tokenResponse = await getXmCloudToken(newInstance.clientId as string, newInstance.clientSecret as string);
+      // if (newInstance.instanceType === enumInstanceType.xmc) {
+      //   const tokenResponse = await getXmCloudToken(newInstance.clientId as string, newInstance.clientSecret as string);
 
-        newInstance.apiToken = tokenResponse.access_token;
+      //   newInstance.apiToken = tokenResponse.access_token;
 
-        // Store token expiration if needed
-        newInstance.expiration = new Date(Date.now() + tokenResponse.expires_in * 1000).toISOString();
-      }
+      //   // Store token expiration if needed
+      //   newInstance.expiration = new Date(Date.now() + tokenResponse.expires_in * 1000).toISOString();
+      // }
 
       const instance: IInstance = {
         ...newInstance,
@@ -56,7 +55,7 @@ export default function InstanceSetupPage() {
 
       const updatedInstances = [...instances, instance];
       setInstances(updatedInstances);
-      localStorage.setItem('instances', JSON.stringify(updatedInstances));
+      sessionStorage.setItem('instances', JSON.stringify(updatedInstances));
       setIsTokenModalOpen(false);
       setIsGenModalOpen(false);
     } catch (error) {
@@ -68,7 +67,7 @@ export default function InstanceSetupPage() {
     const updatedInstances = instances.filter((instance) => instance.id !== id);
     setInstances(updatedInstances);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('instances', JSON.stringify(updatedInstances));
+      sessionStorage.setItem('instances', JSON.stringify(updatedInstances));
     }
   };
 
@@ -99,27 +98,22 @@ export default function InstanceSetupPage() {
               <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Instance Configuration</h1>
                 <div className="flex gap-2">
-                  <Button onClick={() => setIsTokenModalOpen(true)}>
+                  <Button onClick={() => setIsAddModalOpen(true)}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Instance
+                  </Button>
+                  {/* <Button onClick={() => setIsTokenModalOpen(true)}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Add API Token
                   </Button>
                   <Button onClick={() => setIsGenModalOpen(true)}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Generate Token
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
 
-              <RegistrationTokenModal
-                open={isTokenModalOpen}
-                onOpenChange={setIsTokenModalOpen}
-                onSubmit={handleAddInstance}
-              />
-              <RegistrationGenModal
-                open={isGenModalOpen}
-                onOpenChange={setIsGenModalOpen}
-                onSubmit={handleAddInstance}
-              />
+              <AddInstanceModal open={isAddModalOpen} onOpenChange={setIsAddModalOpen} />
 
               <ListingTable instances={instances} onDelete={handleDeleteInstance} />
             </div>
