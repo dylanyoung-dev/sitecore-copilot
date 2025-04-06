@@ -69,7 +69,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, token }) =>
           id: 'welcome',
           role: 'assistant',
           content:
-            'Welcome! I am your Content Specialist. How can I help you with your Sitecore content operations today?',
+            'Welcome! I am your Sitecore DXP specialist. How can I help you with your Sitecore operations today?',
         },
       ]);
     }
@@ -80,8 +80,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, token }) =>
       {
         id: 'welcome',
         role: 'assistant',
-        content:
-          'Welcome! I am your Content Specialist. How can I help you with your Sitecore content operations today?',
+        content: 'Welcome! I am your Sitecore DXP specialist. How can I help you with your Sitecore operations today?',
       },
     ]);
   };

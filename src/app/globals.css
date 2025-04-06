@@ -134,34 +134,3 @@ p[data-slot='dialog-description'] {
     color: #3498db;
   }
 }
-
-.team-header {
-  gap: 24px;
-  align-items: end;
-}
-
-.team-cards a {
-  color: #3498db;
-}
-
-.team-cards img {
-  border-radius: 50%;
-  max-width: 100px;
-  max-height: 100px;
-}
-
-.team-cards .row {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.team-cards .row img {
-  border-radius: 50%;
-}
-
-.team-cards h3 {
-  font-weight: bold;
-  font-size: 22px;
-}
