@@ -1,6 +1,6 @@
 'use client';
 
-import { BookOpen, BrainCircuit, FileDown, HousePlug, Settings, SquareUserRound } from 'lucide-react';
+import { BrainCircuit, HousePlug, Settings, SquareUserRound } from 'lucide-react';
 import * as React from 'react';
 
 import { NavMain } from '@/components/nav-main';
@@ -44,6 +44,10 @@ const data = {
         {
           title: 'API Tokens',
           url: '/settings/config',
+        },
+        {
+          title: 'Feature Flags',
+          url: '/settings/feature',
         },
       ],
     },
