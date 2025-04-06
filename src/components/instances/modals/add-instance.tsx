@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { apiDefinitions } from '@/data/apiDefinitions';
+import { getApiDefinitions } from '@/data/apiDefinitions';
 import { Environments, FieldTypes, IFieldDefinition, IInstance, ProductTypes } from '@/models/IInstance';
 import { FC } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -25,7 +25,7 @@ export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange
   const apiType = watch('apiType');
   const environment = watch('environment');
 
-  const selectedApiDefinition = apiDefinitions.find((def) => def.product === product && def.apiType === apiType);
+  const selectedApiDefinition = getApiDefinitions().find((def) => def.product === product && def.apiType === apiType);
 
   const onSubmit = (data: IInstance) => {
     if (!product || !apiType || !environment || !selectedApiDefinition) {
@@ -88,8 +88,11 @@ export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange
                     <SelectValue placeholder="Select a product" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={ProductTypes.XMC}>XM Cloud</SelectItem>
-                    <SelectItem value={ProductTypes.XP}>XP/XM</SelectItem>
+                    {Object.values(ProductTypes).map((product) => (
+                      <SelectItem key={product} value={product}>
+                        {product}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               )}
@@ -109,7 +112,7 @@ export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange
                       <SelectValue placeholder="Select an API type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {apiDefinitions
+                      {getApiDefinitions()
                         .filter((def) => def.product === product)
                         .map((def) => (
                           <SelectItem key={def.name} value={def.apiType}>

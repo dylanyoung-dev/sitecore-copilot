@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { FeatureFlagProvider } from './context/FeatureFlagContext';
+import { FeatureFlagProvider } from '../context/FeatureFlagContext';
 import './globals.css';
 
 const geistSans = Geist({

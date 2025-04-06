@@ -31,6 +31,7 @@ export interface IApiDefinition {
 export enum ApiTypes {
   Authoring = 'Authoring',
   Content = 'Edge/Content Delivery',
+  Experience = 'Experience',
 }
 
 export enum FieldTypes {
@@ -41,6 +42,7 @@ export enum FieldTypes {
 export enum ProductTypes {
   XMC = 'XM Cloud',
   XP = 'XP/XM',
+  Experience = 'CDP/P',
 }
 
 export enum Environments {

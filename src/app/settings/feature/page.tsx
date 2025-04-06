@@ -1,6 +1,5 @@
 'use client';
 
-import { useFeatureFlags } from '@/app/context/FeatureFlagContext';
 import { AppSidebar } from '@/components/app-sidebar';
 import {
   Breadcrumb,
@@ -12,6 +11,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Switch } from '@/components/ui/switch';
+import { useFeatureFlags } from '@/context/FeatureFlagContext';
 import featureFlags from '@/data/featureFlags';
 import { Separator } from '@radix-ui/react-separator';
 
