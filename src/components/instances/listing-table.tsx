@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { VisibleKey } from '../visible-key';
 
 interface ListingTableProps {
   instances: IInstance[] | undefined;
@@ -49,7 +50,8 @@ export const ListingTable: FC<ListingTableProps> = ({ instances, onDelete }) => 
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead>GraphQL Endpoint</TableHead>
+              <TableHead>Active Token</TableHead>
+              <TableHead>State</TableHead>
               <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -63,13 +65,14 @@ export const ListingTable: FC<ListingTableProps> = ({ instances, onDelete }) => 
             ) : (
               instances.map((instance) => (
                 <TableRow key={instance.id}>
-                  <TableCell className="font-medium">{instance.name}</TableCell>
+                  <TableCell>{instance.name}</TableCell>
                   <TableCell>
-                    <Badge className="bg-gray-500">In Progress</Badge>
+                    <Badge className="bg-gray-500">{instance.product}</Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center">{instance.endpoint}</div>
+                    <VisibleKey keyValue={instance.token} />
                   </TableCell>
+                  <TableCell>{instance.isActive && <Badge>Active</Badge>}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

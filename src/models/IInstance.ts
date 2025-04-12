@@ -1,13 +1,11 @@
 export interface IInstance {
   id: string;
   name: string;
-  endpoint: string;
   token?: string;
   expiration?: string;
   apiType: ApiTypes;
   fields: Record<string, { definition: IFieldDefinition; value: any }>;
   isActive: boolean;
-  environment: Environments;
   product: ProductTypes;
 }
 
@@ -18,6 +16,9 @@ export interface IFieldDefinition {
   required: boolean;
   options?: string[];
   defaultValue?: string;
+  distinct?: boolean;
+  description?: string;
+  placeholder?: string;
 }
 
 export interface IApiDefinition {
@@ -31,7 +32,7 @@ export interface IApiDefinition {
 export enum ApiTypes {
   Authoring = 'Authoring',
   Content = 'Edge/Content Delivery',
-  Experience = 'Experience',
+  PersonalizeREST = 'Personalize REST APIs',
 }
 
 export enum FieldTypes {
@@ -40,15 +41,7 @@ export enum FieldTypes {
 }
 
 export enum ProductTypes {
-  XMC = 'XM Cloud',
-  XP = 'XP/XM',
-  Experience = 'CDP/P',
-}
-
-export enum Environments {
-  Local = 'Local',
-  Dev = 'Development',
-  Staging = 'Staging',
-  QA = 'QA',
-  Production = 'Production',
+  XMC = 'Sitecore XM Cloud',
+  XP = 'Sitecore XP/XM',
+  Experience = 'Sitecore CDP/Personalize',
 }

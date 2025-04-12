@@ -1,6 +1,10 @@
-import { ApiTypes, Environments, FieldTypes, IApiDefinition, ProductTypes } from '@/models/IInstance';
+import { ApiTypes, FieldTypes, IApiDefinition, ProductTypes } from '@/models/IInstance';
 
 export const getApiDefinitions = (): IApiDefinition[] => {
+  if (typeof window === 'undefined') {
+    return []; // Return an empty array during SSR
+  }
+
   const featureFlags = window.sessionStorage.getItem('featureFlags');
   const flags = featureFlags ? JSON.parse(featureFlags) : {};
 
@@ -9,30 +13,41 @@ export const getApiDefinitions = (): IApiDefinition[] => {
       ? [
           {
             name: 'personalize',
-            label: 'Sitecore Experience Chat (CDP/P)',
+            label: 'Sitecore Experience (CDP/P)',
             fields: [
-              {
-                name: 'clientId',
-                label: 'Client ID',
-                type: FieldTypes.Text,
-                required: true,
-              },
-              {
-                name: 'clientSecret',
-                label: 'Client Secret',
-                type: FieldTypes.Text,
-                required: true,
-              },
               {
                 name: 'environment',
                 label: 'Environment',
                 type: FieldTypes.Select,
                 required: true,
-                options: Object.values(Environments),
+                options: ['Nonprod', 'Production'],
+                distinct: true,
+                description:
+                  'Sitecore Personalize environments come with two default environments, either the nonprod or production.',
+              },
+              {
+                name: 'region',
+                label: 'Region',
+                type: FieldTypes.Select,
+                required: true,
+                options: ['APJ', 'EU', 'US'],
+                distinct: true,
+              },
+              {
+                name: 'clientId',
+                label: 'API Key',
+                type: FieldTypes.Text,
+                required: true,
+              },
+              {
+                name: 'clientSecret',
+                label: 'API Secret',
+                type: FieldTypes.Text,
+                required: true,
               },
             ],
-            apiType: ApiTypes.Experience,
-            product: ProductTypes.XP,
+            apiType: ApiTypes.PersonalizeREST,
+            product: ProductTypes.Experience,
           },
         ]
       : []),
@@ -76,33 +91,6 @@ export const getApiDefinitions = (): IApiDefinition[] => {
       ],
       apiType: ApiTypes.Content,
       product: ProductTypes.XMC,
-    },
-    {
-      name: 'xp',
-      label: 'XP/XM',
-      fields: [
-        {
-          name: 'username',
-          label: 'Username',
-          type: FieldTypes.Text,
-          required: true,
-        },
-        {
-          name: 'password',
-          label: 'Password',
-          type: FieldTypes.Text,
-          required: true,
-        },
-        {
-          name: 'environment',
-          label: 'Environment',
-          type: FieldTypes.Select,
-          required: true,
-          options: Object.values(Environments),
-        },
-      ],
-      apiType: ApiTypes.Content,
-      product: ProductTypes.XP,
     },
   ];
 };

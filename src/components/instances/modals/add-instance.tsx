@@ -1,10 +1,12 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getApiDefinitions } from '@/data/apiDefinitions';
-import { Environments, FieldTypes, IFieldDefinition, IInstance, ProductTypes } from '@/models/IInstance';
-import { FC } from 'react';
+import { FieldTypes, IFieldDefinition, IInstance, ProductTypes } from '@/models/IInstance';
+import { FC, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 interface AddInstanceModalProps {
@@ -12,36 +14,63 @@ interface AddInstanceModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const getExistingInstances = (): IInstance[] => {
+  if (typeof window === 'undefined') return []; // Ensure this runs only on the client side
+  const storedInstances = sessionStorage.getItem('instances');
+  return storedInstances ? JSON.parse(storedInstances) : [];
+};
+
 export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange }) => {
+  const [existingInstances, setExistingInstances] = useState<IInstance[]>();
   const { control, handleSubmit, watch, setValue } = useForm<IInstance>({
     defaultValues: {
       product: undefined,
-      environment: undefined,
       fields: {},
     },
   });
 
+  useEffect(() => {
+    setExistingInstances(getExistingInstances());
+  }, []);
+
   const product = watch('product');
   const apiType = watch('apiType');
-  const environment = watch('environment');
 
   const selectedApiDefinition = getApiDefinitions().find((def) => def.product === product && def.apiType === apiType);
 
   const onSubmit = (data: IInstance) => {
-    if (!product || !apiType || !environment || !selectedApiDefinition) {
+    if (!product || !apiType || !selectedApiDefinition) {
       console.error('Missing required fields');
       return;
     }
 
-    // const instance: IInstance = {
-    //   id = crypto.randomUUID(),
-    //   endpoint: selectedApiDefinition.endpoint,
-    //   name: product,
-    //   environment,
-    //   fields,
-    // };
+    const hasDuplicate = existingInstances?.some((instance) => {
+      if (instance.apiType !== apiType || instance.product !== product) return false;
 
-    console.log('Configured Instance:', data);
+      // Check distinct fields
+      return selectedApiDefinition.fields
+        .filter((field) => field.distinct)
+        .every((field) => instance.fields[field.name] === data.fields[field.name]);
+    });
+
+    const instance: IInstance = {
+      id: crypto.randomUUID(),
+      name: data.name,
+      apiType,
+      fields: data.fields,
+      isActive: !hasDuplicate,
+      product,
+    };
+
+    console.log('Configured Instance:', instance);
+
+    // Save the instance to sessionStorage
+    const updatedInstances = [...(existingInstances || []), instance];
+    sessionStorage.setItem('instances', JSON.stringify(updatedInstances));
+    setExistingInstances(updatedInstances);
+
+    // Close the modal
+    onOpenChange(false);
   };
 
   return (
@@ -60,18 +89,6 @@ export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange
               control={control}
               render={({ field }) => (
                 <Input type="text" placeholder="Enter endpoint name" required className="w-full" {...field} />
-              )}
-            />
-          </div>
-
-          {/* Endpoint URL */}
-          <div>
-            <p className="font-medium mb-2">Endpoint URL:</p>
-            <Controller
-              name="endpoint"
-              control={control}
-              render={({ field }) => (
-                <Input type="url" placeholder="Enter endpoint URL" required className="w-full" {...field} />
               )}
             />
           </div>
@@ -126,31 +143,6 @@ export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange
             </div>
           )}
 
-          {/* Environment Selection */}
-          {product && (
-            <div>
-              <p className="font-medium mb-2">Select Environment:</p>
-              <Controller
-                name="environment"
-                control={control}
-                render={({ field }) => (
-                  <Select onValueChange={(value) => field.onChange(value as Environments)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an environment" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.values(Environments).map((env) => (
-                        <SelectItem key={env} value={env}>
-                          {env}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
-          )}
-
           {/* Dynamic Fields */}
           {selectedApiDefinition &&
             selectedApiDefinition.fields.map((field: IFieldDefinition) => (
@@ -194,7 +186,7 @@ export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange
             ))}
 
           {/* Submit Button */}
-          <div className="mt-4">{product && apiType && environment && <Button type="submit">Submit</Button>}</div>
+          <div className="mt-4">{product && apiType && <Button type="submit">Submit</Button>}</div>
         </form>
       </DialogContent>
     </Dialog>

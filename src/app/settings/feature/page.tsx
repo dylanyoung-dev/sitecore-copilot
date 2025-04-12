@@ -58,11 +58,15 @@ export default function FeatureFlagPage() {
                       <div className="space-y-0.5">
                         <p className="text-sm text-muted-foreground">{flag.description}</p>
                       </div>
-                      <Switch
-                        checked={flags[flag.key] ?? flag.enabled}
-                        onCheckedChange={() => toggleFlag(flag.key)}
-                        aria-label={`Toggle ${flag.description}`}
-                      />
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">{flags[flag.key] ? 'On' : 'Off'}</span>
+                        <Switch
+                          checked={flags[flag.key] ?? flag.enabled}
+                          className="cursor-pointer"
+                          onCheckedChange={() => toggleFlag(flag.key)}
+                          aria-label={`Toggle ${flag.description}`}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
