@@ -1,6 +1,5 @@
 'use client';
 
-import { useFeatureFlags } from '@/app/context/FeatureFlagContext';
 import { AppSidebar } from '@/components/app-sidebar';
 import {
   Breadcrumb,
@@ -12,6 +11,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Switch } from '@/components/ui/switch';
+import { useFeatureFlags } from '@/context/FeatureFlagContext';
 import featureFlags from '@/data/featureFlags';
 import { Separator } from '@radix-ui/react-separator';
 
@@ -58,11 +58,15 @@ export default function FeatureFlagPage() {
                       <div className="space-y-0.5">
                         <p className="text-sm text-muted-foreground">{flag.description}</p>
                       </div>
-                      <Switch
-                        checked={flags[flag.key] ?? flag.enabled}
-                        onCheckedChange={() => toggleFlag(flag.key)}
-                        aria-label={`Toggle ${flag.description}`}
-                      />
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">{flags[flag.key] ? 'On' : 'Off'}</span>
+                        <Switch
+                          checked={flags[flag.key] ?? flag.enabled}
+                          className="cursor-pointer"
+                          onCheckedChange={() => toggleFlag(flag.key)}
+                          aria-label={`Toggle ${flag.description}`}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>

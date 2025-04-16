@@ -1,4 +1,5 @@
 'use client';
+
 import { AppSidebar } from '@/components/app-sidebar';
 import { CopilotChat } from '@/components/copilot/copilot-chat';
 
@@ -11,6 +12,8 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { useInstances } from '@/hooks/use-instances';
+import { useTokens } from '@/hooks/use-tokens';
 import { IInstance } from '@/models/IInstance';
 import { enumTokenTypes, IToken } from '@/models/IToken';
 import { Separator } from '@radix-ui/react-separator';
@@ -19,31 +22,14 @@ import { useEffect, useState } from 'react';
 export default function CopilotPage() {
   const [instances, setInstances] = useState<IInstance[]>([]);
   const [openAiToken, setOpenAIToken] = useState<IToken | undefined>();
-
-  // useEffect(() => {
-  //   const saved = localStorage.getItem('instances');
-  //   if (saved) {
-  //     try {
-  //       const parsedInstances = JSON.parse(saved);
-  //       setInstances(parsedInstances);
-  //     } catch (error) {
-  //       console.error('Error parsing instances from localStorage:', error);
-  //     }
-  //   }
-  // }, []);
+  const instanceStorage = useInstances();
+  const tokenStorage = useTokens();
 
   useEffect(() => {
-    const savedTokens = localStorage.getItem('api-tokens');
-    if (savedTokens) {
-      try {
-        const parsedTokens = JSON.parse(savedTokens);
-        const openAIConfig = parsedTokens.find((token: any) => token.type === enumTokenTypes.OpenAI);
-        if (openAIConfig) {
-          setOpenAIToken(openAIConfig);
-        }
-      } catch (error) {
-        console.error('Error parsing tokens from localStorage:', error);
-      }
+    const openAIConfig = tokenStorage.getTokenByType(enumTokenTypes.OpenAI);
+
+    if (openAIConfig) {
+      setOpenAIToken(openAIConfig);
     }
   }, []);
 

@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { useTokens } from '@/hooks/use-tokens';
 import { IToken } from '@/models/IToken';
 import { Separator } from '@radix-ui/react-separator';
 import { PlusCircle } from 'lucide-react';
@@ -21,17 +22,11 @@ import { useEffect, useState } from 'react';
 export default function TokenConfigPage() {
   const [tokens, setTokens] = useState<IToken[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const tokenStorage = useTokens();
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('api-tokens');
-      if (saved) {
-        setTokens(JSON.parse(saved));
-      }
-    } catch (error) {
-      console.error('Error loading tokens:', error);
-    }
-  }, []);
+    setTokens(tokenStorage.tokens);
+  }, [tokenStorage.tokens]);
 
   const handleAddToken = (newToken: Omit<IToken, 'id'>) => {
     const token: IToken = {
@@ -40,14 +35,14 @@ export default function TokenConfigPage() {
     };
     const updatedTokens = [...tokens, token];
     setTokens(updatedTokens);
-    localStorage.setItem('api-tokens', JSON.stringify(updatedTokens));
+    tokenStorage.addToken(token); // Save to session storage
     setIsModalOpen(false);
   };
 
   const handleDeleteToken = (id: string) => {
     const updatedTokens = tokens.filter((token) => token.id !== id);
     setTokens(updatedTokens);
-    localStorage.setItem('api-tokens', JSON.stringify(updatedTokens));
+    tokenStorage.deleteToken(id); // Remove from session storage
   };
 
   return (

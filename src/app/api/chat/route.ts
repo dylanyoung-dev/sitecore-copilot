@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
   const systemPrompt = {
     role: 'system',
-    content: `You are a Sitecore Content Operations expert assistant. 
+    content: `You are a Sitecore Operations expert assistant. 
     You have access to the following Sitecore instance: ${JSON.stringify(instanceData)}.
 
     Instructions

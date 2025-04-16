@@ -98,18 +98,10 @@ export default function InstanceSetupPage() {
               <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">Instance Configuration</h1>
                 <div className="flex gap-2">
-                  <Button onClick={() => setIsAddModalOpen(true)}>
+                  <Button className="cursor-pointer" onClick={() => setIsAddModalOpen(true)}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Add Instance
                   </Button>
-                  {/* <Button onClick={() => setIsTokenModalOpen(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add API Token
-                  </Button>
-                  <Button onClick={() => setIsGenModalOpen(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Generate Token
-                  </Button> */}
                 </div>
               </div>
 
