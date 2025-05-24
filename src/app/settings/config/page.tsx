@@ -25,15 +25,33 @@ export default function TokenConfigPage() {
   const tokenStorage = useTokens();
 
   useEffect(() => {
-    setTokens(tokenStorage.tokens);
-  }, [tokenStorage.tokens]);
-
+    try {
+      const saved = localStorage.getItem('api-tokens');
+      if (saved) {
+        setTokens(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Error loading tokens:', error);
+    }
+  }, []);
   const handleAddToken = (newToken: Omit<IToken, 'id'>) => {
     const token: IToken = {
       ...newToken,
       id: crypto.randomUUID(),
     };
-    const updatedTokens = [...tokens, token];
+
+    // If this new token is active, deactivate any other tokens with the same category and provider
+    let updatedTokens = [...tokens];
+    if (token.active) {
+      updatedTokens = updatedTokens.map((existingToken) => {
+        if (existingToken.category === token.category && existingToken.provider === token.provider) {
+          return { ...existingToken, active: false };
+        }
+        return existingToken;
+      });
+    }
+
+    updatedTokens.push(token);
     setTokens(updatedTokens);
     tokenStorage.addToken(token); // Save to session storage
     setIsModalOpen(false);
@@ -43,6 +61,64 @@ export default function TokenConfigPage() {
     const updatedTokens = tokens.filter((token) => token.id !== id);
     setTokens(updatedTokens);
     tokenStorage.deleteToken(id); // Remove from session storage
+  };
+
+  const handleToggleActive = (id: string) => {
+    // Find the token we're toggling
+    const targetToken = tokens.find((token) => token.id === id);
+    if (!targetToken) return;
+
+    const newIsActive = !targetToken.active;
+
+    // Update all tokens, ensuring only one active token per category/provider
+    const updatedTokens = tokens.map((token) => {
+      // If we're activating a token, deactivate any other tokens with same category/provider
+      if (
+        newIsActive &&
+        token.id !== id &&
+        token.category === targetToken.category &&
+        token.provider === targetToken.provider
+      ) {
+        return { ...token, active: false };
+      }
+      // Update the target token's active state
+      if (token.id === id) {
+        return { ...token, active: newIsActive };
+      }
+      return token;
+    });
+
+    setTokens(updatedTokens);
+    localStorage.setItem('api-tokens', JSON.stringify(updatedTokens));
+  };
+
+  const handleToggleActive = (id: string) => {
+    // Find the token we're toggling
+    const targetToken = tokens.find((token) => token.id === id);
+    if (!targetToken) return;
+
+    const newIsActive = !targetToken.active;
+
+    // Update all tokens, ensuring only one active token per category/provider
+    const updatedTokens = tokens.map((token) => {
+      // If we're activating a token, deactivate any other tokens with same category/provider
+      if (
+        newIsActive &&
+        token.id !== id &&
+        token.category === targetToken.category &&
+        token.provider === targetToken.provider
+      ) {
+        return { ...token, active: false };
+      }
+      // Update the target token's active state
+      if (token.id === id) {
+        return { ...token, active: newIsActive };
+      }
+      return token;
+    });
+
+    setTokens(updatedTokens);
+    localStorage.setItem('api-tokens', JSON.stringify(updatedTokens));
   };
 
   return (
@@ -79,7 +155,7 @@ export default function TokenConfigPage() {
 
               <AddTokenModal open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={handleAddToken} />
 
-              <TokenTable tokens={tokens} onDelete={handleDeleteToken} />
+              <TokenTable tokens={tokens} onDelete={handleDeleteToken} onToggleActive={handleToggleActive} />
             </div>
           </div>
         </div>
