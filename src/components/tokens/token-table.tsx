@@ -1,4 +1,4 @@
-import { Eye, EyeOff, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, MoreHorizontal, Power, PowerOff, Trash2 } from 'lucide-react';
 import { FC, useState } from 'react';
 import {
   AlertDialog,
@@ -21,18 +21,17 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+
+import { IToken } from '@/models/IToken';
 
 interface TokenTableProps {
-  tokens: {
-    id: string;
-    name: string;
-    type: 'openai';
-    token: string;
-  }[];
+  tokens: IToken[];
   onDelete: (id: string) => void;
+  onToggleActive: (id: string) => void;
 }
 
-export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
+export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete, onToggleActive }) => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [visibleTokens, setVisibleTokens] = useState<string[]>([]);
 
@@ -44,19 +43,24 @@ export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
 
   return (
     <>
+      {' '}
       <Table>
+        {' '}
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
-            <TableHead>Type</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Provider</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>Token</TableHead>
             <TableHead className="w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
+          {' '}
           {tokens.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
+              <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
                 No API tokens configured. Add your first token to get started.
               </TableCell>
             </TableRow>
@@ -65,7 +69,40 @@ export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
               <TableRow key={token.id}>
                 <TableCell>{token.name}</TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{token.type}</Badge>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="outline">{token.category}</Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Token Category</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </TableCell>{' '}
+                <TableCell>
+                  <Badge variant="secondary">{token.provider}</Badge>
+                </TableCell>
+                <TableCell>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={token.active ? 'default' : 'outline'}
+                          size="sm"
+                          className={token.active ? 'bg-green-500 hover:bg-green-600' : 'text-muted-foreground'}
+                          onClick={() => onToggleActive(token.id)}
+                        >
+                          {token.active ? <Power className="h-4 w-4 mr-1" /> : <PowerOff className="h-4 w-4 mr-1" />}
+                          {token.active ? 'Active' : 'Inactive'}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{token.active ? 'Deactivate token' : 'Activate token'}</p>
+                        <p className="text-xs text-muted-foreground">Only one token per provider can be active</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </TableCell>
                 <TableCell className="font-mono">
                   <div className="flex items-center gap-2">
@@ -97,7 +134,6 @@ export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
           )}
         </TableBody>
       </Table>
-
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
