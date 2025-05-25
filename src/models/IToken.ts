@@ -3,8 +3,6 @@ export interface IToken {
   name: string;
   category: enumTokenCategories;
   provider: enumTokenProviders;
-  category: enumTokenCategories;
-  provider: enumTokenProviders;
   token: string;
   active: boolean; // Whether the token is active and should be used
   type?: enumTokenTypes; // Optional, for backward compatibility
