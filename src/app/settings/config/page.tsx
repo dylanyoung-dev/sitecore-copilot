@@ -62,69 +62,6 @@ export default function TokenConfigPage() {
     setTokens(updatedTokens);
     tokenStorage.deleteToken(id); // Remove from session storage
   };
-  const handleToggleActive = (id: string) => {
-    // Find the token we're toggling
-    const targetToken = tokens.find((token) => token.id === id);
-    if (!targetToken) return;
-
-    const newIsActive = !targetToken.active;
-
-    // Update all tokens, ensuring only one active token per category/provider
-    const updatedTokens = tokens.map((token) => {
-      // If we're activating a token, deactivate any other tokens with same category/provider
-      if (
-        newIsActive &&
-        token.id !== id &&
-        token.category === targetToken.category &&
-        token.provider === targetToken.provider
-      ) {
-        return { ...token, active: false };
-      }
-      // Update the target token's active state
-      if (token.id === id) {
-        return { ...token, active: newIsActive };
-      }
-      return token;
-    });
-
-    setTokens(updatedTokens);
-    localStorage.setItem('api-tokens', JSON.stringify(updatedTokens));
-
-    // Also update in session storage using tokenStorage hook
-    const updatedToken = updatedTokens.find((t) => t.id === id);
-    if (updatedToken) {
-      tokenStorage.updateToken(updatedToken);
-    }
-  };
-
-  const handleToggleActive = (id: string) => {
-    // Find the token we're toggling
-    const targetToken = tokens.find((token) => token.id === id);
-    if (!targetToken) return;
-
-    const newIsActive = !targetToken.active;
-
-    // Update all tokens, ensuring only one active token per category/provider
-    const updatedTokens = tokens.map((token) => {
-      // If we're activating a token, deactivate any other tokens with same category/provider
-      if (
-        newIsActive &&
-        token.id !== id &&
-        token.category === targetToken.category &&
-        token.provider === targetToken.provider
-      ) {
-        return { ...token, active: false };
-      }
-      // Update the target token's active state
-      if (token.id === id) {
-        return { ...token, active: newIsActive };
-      }
-      return token;
-    });
-
-    setTokens(updatedTokens);
-    localStorage.setItem('api-tokens', JSON.stringify(updatedTokens));
-  };
 
   return (
     <SidebarProvider>
@@ -160,7 +97,7 @@ export default function TokenConfigPage() {
 
               <AddTokenModal open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={handleAddToken} />
 
-              <TokenTable tokens={tokens} onDelete={handleDeleteToken} onToggleActive={handleToggleActive} />
+              <TokenTable tokens={tokens} onDelete={handleDeleteToken} />
             </div>
           </div>
         </div>

@@ -28,10 +28,9 @@ import { IToken } from '@/models/IToken';
 interface TokenTableProps {
   tokens: IToken[];
   onDelete: (id: string) => void;
-  onToggleActive: (id: string) => void;
 }
 
-export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete, onToggleActive }) => {
+export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [visibleTokens, setVisibleTokens] = useState<string[]>([]);
 
@@ -91,7 +90,6 @@ export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete, onToggleActi
                           variant={token.active ? 'default' : 'outline'}
                           size="sm"
                           className={token.active ? 'bg-green-500 hover:bg-green-600' : 'text-muted-foreground'}
-                          onClick={() => onToggleActive(token.id)}
                         >
                           {token.active ? <Power className="h-4 w-4 mr-1" /> : <PowerOff className="h-4 w-4 mr-1" />}
                           {token.active ? 'Active' : 'Inactive'}
