@@ -1,3 +1,5 @@
+import { HeaderConfig } from '@/models/IMcpServer';
+
 export interface YamlServerConfig {
   label: string;
   name: string;
@@ -8,6 +10,7 @@ export interface YamlServerConfig {
   docUrl?: string;
   description: string;
   requiresHeaders?: boolean;
+  headers?: HeaderConfig[];
 }
 
 export interface YamlMcpConfig {

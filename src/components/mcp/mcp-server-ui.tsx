@@ -8,7 +8,7 @@ import { useInstances } from '@/hooks/use-instances';
 import { useMcpServers } from '@/hooks/use-mcp-servers';
 import { useTokens } from '@/hooks/use-tokens';
 import { HeaderConfig, IMcpServer } from '@/models/IMcpServer';
-import { getPredefinedHeaders, populateHeaderValues } from '@/utils/headerUtils';
+import { populateHeaderValues } from '@/utils/headerUtils';
 import { YamlServerConfig } from '@/utils/yamlUtils';
 import { AlertCircle, ChevronLeft, Info, Loader2, Plus, Power, Server, Settings, Trash2, X } from 'lucide-react';
 import { FC, useState } from 'react';
@@ -46,16 +46,17 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
     }
     onOpenChange(newOpen);
   }; // Handle preconfigured server selection
+
   const handlePreconfiguredSelect = (server: YamlServerConfig) => {
-    // Get any predefined headers for this server
+    // Get any predefined headers for this server directly from the server config
     let serverHeaders: HeaderConfig[] = [];
 
-    if (server.requiresHeaders) {
-      // Get predefined headers for this server
-      const predefinedHeaders = getPredefinedHeaders(server.name);
+    if (server.headers && server.headers.length > 0) {
+      // Use the headers defined in YAML
+      serverHeaders = [...server.headers];
 
       // Populate values from existing tokens and instances
-      serverHeaders = populateHeaderValues(predefinedHeaders, tokens, instances);
+      serverHeaders = populateHeaderValues(serverHeaders, tokens, instances);
 
       // If headers require values, show the header config screen
       const missingRequiredHeaders = serverHeaders.some((h) => h.required && !h.value);

@@ -1,107 +1,45 @@
 import { IInstance } from '@/models/IInstance';
 import { HeaderConfig } from '@/models/IMcpServer';
-import { enumTokenProviders, IToken } from '@/models/IToken';
-
-/**
- * Get predefined headers for specific MCP servers
- * @param serverName The name of the server
- * @returns Array of header configurations
- */
-export const getPredefinedHeaders = (serverName: string): HeaderConfig[] => {
-  switch (serverName.toLowerCase()) {
-    case 'sitecore':
-      return [
-        {
-          key: 'x-personalize-tenant-id',
-          value: '',
-          required: true,
-          source: {
-            type: 'instance',
-            field: 'tenantId',
-          },
-        },
-        {
-          key: 'x-personalize-api-key',
-          value: '',
-          required: true,
-          source: {
-            type: 'token',
-            field: 'token',
-          },
-        },
-      ];
-    // Add other predefined server configurations as needed
-    default:
-      return [];
-  }
-};
+import { IToken } from '@/models/IToken';
 
 /**
  * Populate header values from available tokens and instances
  */
-export const populateHeaderValues = (
+export function populateHeaderValues(
   headers: HeaderConfig[],
   tokens: IToken[] = [],
   instances: IInstance[] = []
-): HeaderConfig[] => {
+): HeaderConfig[] {
   return headers.map((header) => {
-    if (!header.source) {
-      return header;
-    }
+    if (!header.source) return header;
 
-    // Try to find a value from tokens or instances
-    if (header.source.type === 'token') {
-      // Find relevant tokens (prefer active ones)
-      const activeTokens = tokens.filter((t) => t.active);
-      const relevantTokens = activeTokens.length ? activeTokens : tokens;
+    const { type, field } = header.source;
+    let value = header.value;
 
-      // For Personalize API key, look for tokens with provider: OpenAI (as an example)
-      if (header.key === 'x-personalize-api-key') {
-        const token = relevantTokens.find(
-          (t) =>
-            t.provider === enumTokenProviders.OpenAI ||
-            t.name.toLowerCase().includes('personalize') ||
-            t.name.toLowerCase().includes('sitecore')
-        );
-
-        if (token && header.source.field) {
-          return {
-            ...header,
-            value: (token[header.source.field as keyof IToken] as string) || '',
-          };
-        }
+    if (type === 'token' && field) {
+      const provider = header.source.provider;
+      const token = tokens.find((t) => (provider ? t.provider === provider : true) && t.active);
+      if (token && token[field as keyof IToken]) {
+        value = String(token[field as keyof IToken]);
       }
     }
 
-    if (header.source.type === 'instance') {
-      // Try to find a matching instance
-      const instance = instances.find(
-        (i) => i.name.toLowerCase().includes('personalize') || i.name.toLowerCase().includes('sitecore')
-      );
+    if (type === 'instance' && field) {
+      const filter = header.source.instanceFilter;
+      let instance: IInstance | undefined;
 
-      if (instance && header.source.field) {
-        // Safely access nested properties if field has dots
-        const fieldParts = header.source.field.split('.');
-        let value: any = instance;
+      if (filter) {
+        const [key, val] = filter.split('=');
+        instance = instances.find((i) => i[key as keyof IInstance] === val);
+      } else {
+        instance = instances[0]; // Default to first instance if no filter
+      }
 
-        for (const part of fieldParts) {
-          if (value && value[part] !== undefined) {
-            value = value[part];
-          } else {
-            value = '';
-            break;
-          }
-        }
-
-        if (value && typeof value === 'string') {
-          return {
-            ...header,
-            value,
-          };
-        }
+      if (instance?.fields?.[field]?.value) {
+        value = instance.fields[field].value;
       }
     }
 
-    return header;
+    return { ...header, value };
   });
-};
+}

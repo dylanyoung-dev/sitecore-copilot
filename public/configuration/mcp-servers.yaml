@@ -10,6 +10,13 @@ servers:
     docUrl: 'https://github.com/dylanyoung-dev/sitecore-personalize-mcp-remote'
     description: 'Unofficial Sitecore Personalize MCP (Remote - HttpStreamable) Server hosted on Cloudflare Workers'
     requiresHeaders: true
+    headers:
+      - key: 'x-personalize-tenant-id'
+        required: true
+        source:
+          type: 'instance'
+          instanceFilter: 'product=personalize'
+          field: 'tenantId'
 
   - label: 'Sitecore XMC Apps (Unofficial)'
     name: 'XMC Apps'
