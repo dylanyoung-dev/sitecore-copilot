@@ -5,6 +5,14 @@ export interface IToken {
   provider: enumTokenProviders;
   token: string;
   active: boolean; // Whether the token is active and should be used
+  type?: enumTokenTypes; // Optional, for backward compatibility
+}
+
+// Types of tokens (for legacy support)
+export enum enumTokenTypes {
+  OpenAI = 'openai',
+  Anthropic = 'anthropic',
+  // Add other token types as needed
 }
 
 // Top-level token categories

@@ -16,7 +16,7 @@ const data = {
   },
   teams: [
     {
-      name: 'Sitecore Copilot',
+      name: 'Copilot',
       logo: BrainCircuit,
     },
   ],

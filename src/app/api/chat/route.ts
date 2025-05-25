@@ -2,6 +2,8 @@ import { IInstance } from '@/models/IInstance';
 import { IMcpServer } from '@/models/IMcpServer';
 import { enumTokenProviders, IToken } from '@/models/IToken';
 import { getModelProvider } from '@/models/enumModels';
+import { headersToRecord } from '@/utils/mcpUtils';
+import { configureSitecorePersonalizeMcp } from '@/utils/sitecorePersonalizeUtils';
 import { createOpenAI } from '@ai-sdk/openai';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { experimental_createMCPClient, streamText } from 'ai';
@@ -18,7 +20,7 @@ interface ChatRequest {
   mcpServers?: IMcpServer[];
 }
 
-async function initializeMcpClients(mcpServers: IMcpServer[]) {
+async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] = [], instances: IInstance[] = []) {
   const activeServers = mcpServers.filter((server) => server.isActive);
   const clients: Array<{ client: any; server: IMcpServer }> = [];
   // Use Record<string, any> to properly type the dynamic keys
@@ -28,16 +30,45 @@ async function initializeMcpClients(mcpServers: IMcpServer[]) {
     try {
       let client;
 
+      // Convert header configs to a simple header object
+      const headers = headersToRecord(server.headers);
+
+      // Create client based on transport type
       if (server.type === 'sse') {
-        client = await experimental_createMCPClient({
+        // For SSE transports
+        const options: any = {
           transport: {
             type: 'sse',
             url: server.url,
           },
-        });
+        };
+
+        // Add headers if we have any
+        if (Object.keys(headers).length > 0) {
+          options.transport.fetchOptions = { headers };
+        }
+
+        client = await experimental_createMCPClient(options);
       } else if (server.type === 'http') {
-        const transport = new StreamableHTTPClientTransport(new URL(server.url));
-        client = await experimental_createMCPClient({ transport });
+        // For HTTP transports
+        const url = new URL(server.url);
+        let transport = new StreamableHTTPClientTransport(url);
+
+        // Since we can't directly modify the transport headers,
+        // we'll create a new MCP client with the headers option
+        const options: any = {
+          transport: {
+            type: 'http',
+            url: server.url,
+          },
+        };
+
+        // Add headers if available
+        if (Object.keys(headers).length > 0) {
+          options.headers = headers;
+        }
+
+        client = await experimental_createMCPClient(options);
       }
 
       if (client) {
@@ -71,6 +102,16 @@ export async function POST(req: Request) {
     mcpServers = [],
   }: ChatRequest = await req.json();
 
+  // Configure Sitecore-specific MCP servers with the right headers
+  const instances = instanceData ? [instanceData] : [];
+  const updatedMcpServers = mcpServers.map((server) => {
+    if (server.name.toLowerCase().includes('sitecore') && server.name.toLowerCase().includes('personalize')) {
+      const configuredServer = configureSitecorePersonalizeMcp([server], allTokens, instances);
+      return configuredServer || server;
+    }
+    return server;
+  });
+
   // Get the model provider to ensure we're using the right token
   const modelProviderName = getModelProvider(model);
 
@@ -101,10 +142,9 @@ export async function POST(req: Request) {
     model,
     mcpServers,
   });
-
   try {
-    // Initialize MCP clients
-    const { clients, tools: mcpTools } = await initializeMcpClients(mcpServers);
+    // Initialize MCP clients with all available context
+    const { clients, tools: mcpTools } = await initializeMcpClients(updatedMcpServers, allTokens, instances);
 
     // Create appropriate AI client based on token provider
     let aiClient;
