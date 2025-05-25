@@ -7,6 +7,8 @@ import { configureSitecorePersonalizeMcp } from '@/utils/sitecorePersonalizeUtil
 import { createOpenAI } from '@ai-sdk/openai';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { experimental_createMCPClient, streamText } from 'ai';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { experimental_createMCPClient, streamText } from 'ai';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -14,6 +16,8 @@ export const maxDuration = 30;
 interface ChatRequest {
   messages: any[];
   instanceData: IInstance;
+  tokenData: IToken; // Currently selected token
+  allTokens?: IToken[]; // All available tokens
   tokenData: IToken; // Currently selected token
   allTokens?: IToken[]; // All available tokens
   model: string;
@@ -101,6 +105,14 @@ export async function POST(req: Request) {
     model = 'gpt-4o-mini',
     mcpServers = [],
   }: ChatRequest = await req.json();
+  const {
+    messages,
+    instanceData,
+    tokenData,
+    allTokens = [],
+    model = 'gpt-4o-mini',
+    mcpServers = [],
+  }: ChatRequest = await req.json();
 
   // Configure Sitecore-specific MCP servers with the right headers
   const instances = instanceData ? [instanceData] : [];
@@ -177,6 +189,9 @@ export async function POST(req: Request) {
     const systemPrompt = {
       role: 'system',
       content: `You are a Sitecore Expert assistant. 
+    const systemPrompt = {
+      role: 'system',
+      content: `You are a Sitecore Expert assistant. 
 
     Instructions
     - Always ask to confirm before running any functions
@@ -196,7 +211,18 @@ export async function POST(req: Request) {
       tools,
       maxSteps: 3,
     });
+    };
+    const result = streamText({
+      model: aiClient(model),
+      messages: [systemPrompt, ...messages],
+      tools,
+      maxSteps: 3,
+    });
 
+    return result.toDataStreamResponse();
+  } catch (error) {
+    return new Response('Internal Server Error', { status: 500 });
+  }
     return result.toDataStreamResponse();
   } catch (error) {
     return new Response('Internal Server Error', { status: 500 });
