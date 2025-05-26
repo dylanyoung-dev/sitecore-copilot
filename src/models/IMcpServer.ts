@@ -8,6 +8,8 @@ export interface IMcpServer {
   type: 'http' | 'sse';
   token?: string;
   tools?: string[];
+  category?: string;
+  tags?: string[];
   headers?: HeaderConfig[];
 }
 

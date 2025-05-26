@@ -17,50 +17,38 @@ import { useTokens } from '@/hooks/use-tokens';
 import { IToken } from '@/models/IToken';
 import { Separator } from '@radix-ui/react-separator';
 import { PlusCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export default function TokenConfigPage() {
-  const [tokens, setTokens] = useState<IToken[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const tokenStorage = useTokens();
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('api-tokens');
-      if (saved) {
-        setTokens(JSON.parse(saved));
-      }
-    } catch (error) {
-      console.error('Error loading tokens:', error);
-    }
-  }, []);
   const handleAddToken = (newToken: Omit<IToken, 'id'>) => {
     const token: IToken = {
       ...newToken,
       id: crypto.randomUUID(),
     };
 
-    // If this new token is active, deactivate any other tokens with the same category and provider
-    let updatedTokens = [...tokens];
+    // Deactivate other tokens with same category/provider if needed
     if (token.active) {
-      updatedTokens = updatedTokens.map((existingToken) => {
-        if (existingToken.category === token.category && existingToken.provider === token.provider) {
-          return { ...existingToken, active: false };
-        }
-        return existingToken;
-      });
+      tokenStorage.tokens
+        .filter(
+          (existingToken) =>
+            existingToken.category === token.category &&
+            existingToken.provider === token.provider &&
+            existingToken.active
+        )
+        .forEach((existingToken) => {
+          tokenStorage.updateToken({ ...existingToken, active: false });
+        });
     }
 
-    updatedTokens.push(token);
-    setTokens(updatedTokens);
-    tokenStorage.addToken(token); // Save to session storage
+    tokenStorage.addToken(token);
     setIsModalOpen(false);
   };
 
   const handleDeleteToken = (id: string) => {
-    const updatedTokens = tokens.filter((token) => token.id !== id);
-    setTokens(updatedTokens);
-    tokenStorage.deleteToken(id); // Remove from session storage
+    tokenStorage.deleteToken(id);
   };
 
   return (
@@ -97,7 +85,7 @@ export default function TokenConfigPage() {
 
               <AddTokenModal open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={handleAddToken} />
 
-              <TokenTable tokens={tokens} onDelete={handleDeleteToken} />
+              <TokenTable tokens={tokenStorage.tokens} onDelete={handleDeleteToken} />
             </div>
           </div>
         </div>

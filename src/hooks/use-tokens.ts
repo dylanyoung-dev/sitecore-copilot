@@ -8,7 +8,7 @@ export const useTokens = () => {
   const SESSION_STORAGE_KEY = 'api-tokens';
 
   useEffect(() => {
-    const saved = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    const saved = localStorage.getItem(SESSION_STORAGE_KEY);
 
     if (saved) {
       try {
@@ -23,13 +23,13 @@ export const useTokens = () => {
   const addToken = (token: IToken) => {
     const updatedTokens = [...tokens, token];
     setTokens(updatedTokens);
-    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedTokens));
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedTokens));
   };
 
   const deleteToken = (id: string) => {
     const updatedTokens = tokens.filter((token) => token.id !== id);
     setTokens(updatedTokens);
-    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedTokens));
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedTokens));
   };
 
   const getTokenById = (id: string): IToken | undefined => {
@@ -51,7 +51,7 @@ export const useTokens = () => {
   const updateToken = (updatedToken: IToken) => {
     const updatedTokens = tokens.map((token) => (token.id === updatedToken.id ? updatedToken : token));
     setTokens(updatedTokens);
-    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedTokens));
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedTokens));
   };
 
   return { tokens, addToken, deleteToken, updateToken, getTokenById, getTokenByType, getActiveTokens };

@@ -78,8 +78,6 @@ export const AddTokenModal = ({ open, onOpenChange, onSubmit }: AddTokenModalPro
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            {' '}
-            {/* Token Category Selection */}
             <FormField
               control={form.control}
               name="category"
@@ -204,10 +202,12 @@ export const AddTokenModal = ({ open, onOpenChange, onSubmit }: AddTokenModalPro
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="cursor-pointer">
                 Cancel
               </Button>
-              <Button type="submit">Add Token</Button>
+              <Button type="submit" className="cursor-pointer">
+                Add Token
+              </Button>
             </DialogFooter>
           </form>
         </Form>
