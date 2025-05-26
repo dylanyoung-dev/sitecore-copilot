@@ -1,25 +1,25 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { HeaderConfig } from '@/models/IMcpServer';
+import { IHeaderConfig } from '@/models/IHeaderConfig';
 import { AlertCircle, ChevronLeft, Info, Plus, X } from 'lucide-react';
 import { FC, useState } from 'react';
 
 interface HeadersConfigProps {
-  headers: HeaderConfig[];
-  onHeadersChange: (headers: HeaderConfig[]) => void;
+  headers: IHeaderConfig[];
+  onHeadersChange: (headers: IHeaderConfig[]) => void;
   onBack: () => void;
   onSave: () => void;
   onCancel: () => void;
 }
 
 export const HeadersConfig: FC<HeadersConfigProps> = ({ headers, onHeadersChange, onBack, onSave, onCancel }) => {
-  const [newHeader, setNewHeader] = useState<HeaderConfig>({
+  const [newHeader, setNewHeader] = useState<IHeaderConfig>({
     key: '',
     value: '',
     required: false,
   });
 
-  const handleHeaderChange = (index: number, field: keyof HeaderConfig, value: string | boolean) => {
+  const handleHeaderChange = (index: number, field: keyof IHeaderConfig, value: string | boolean) => {
     const updatedHeaders = [...headers];
     updatedHeaders[index] = { ...updatedHeaders[index], [field]: value };
     onHeadersChange(updatedHeaders);

@@ -1,16 +1,16 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { YamlServerConfig } from '@/utils/yamlUtils';
+import { IYamlServerConfig } from '@/models/IYamlConfig';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import { FC } from 'react';
 
 interface Props {
-  preconfiguredServers: YamlServerConfig[];
+  preconfiguredServers: IYamlServerConfig[];
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
   isLoading: boolean;
   onBack: () => void;
-  onSelect: (server: YamlServerConfig) => void;
+  onSelect: (server: IYamlServerConfig) => void;
 }
 
 export const PreconfiguredServerSelector: FC<Props> = ({

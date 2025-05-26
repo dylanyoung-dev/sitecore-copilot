@@ -102,15 +102,10 @@ export async function POST(req: Request) {
     mcpServers = [],
   }: ChatRequest = await req.json();
 
-  // Configure Sitecore-specific MCP servers with the right headers
+  // Remove Sitecore-specific MCP server configuration.
+  // Instead, just use the servers as provided (they should already have correct headers from YAML/config).
   const instances = instanceData ? [instanceData] : [];
-  const updatedMcpServers = mcpServers.map((server) => {
-    if (server.name.toLowerCase().includes('sitecore') && server.name.toLowerCase().includes('personalize')) {
-      const configuredServer = configureSitecorePersonalizeMcp([server], allTokens, instances);
-      return configuredServer || server;
-    }
-    return server;
-  });
+  const updatedMcpServers = mcpServers;
 
   // Get the model provider to ensure we're using the right token
   const modelProviderName = getModelProvider(model);

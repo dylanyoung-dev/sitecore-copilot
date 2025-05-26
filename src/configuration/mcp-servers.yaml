@@ -10,18 +10,40 @@ servers:
     docUrl: 'https://github.com/dylanyoung-dev/sitecore-personalize-mcp-remote'
     description: 'Unofficial Sitecore Personalize MCP (Remote - HttpStreamable) Server hosted on Cloudflare Workers'
     requiresHeaders: true
+    category: 'Marketing'
+    headers:
+      - key: 'x-sitecore-client-id'
+        required: true
+        source:
+          type: 'instance'
+          instanceFilter: 'product=personalize'
+          field: 'tenantId'
+      - key: 'x-sitecore-client-secret'
+        required: true
+        source:
+          type: 'instance'
+          instanceFilter: 'product=personalize'
+          field: 'tenantId'
+      - key: 'x-sitecore-region'
+        required: true
+        source:
+          type: 'instance'
+          instanceFilter: 'product=personalize'
+          field: 'tenantId'
 
   - label: 'Sitecore XMC Apps (Unofficial)'
     name: 'XMC Apps'
     url: ''
     type: 'http'
     security: 'open'
+    category: 'CMS'
     disabled: true
     docUrl: ''
     description: 'Unofficial Sitecore XMC Apps MCP (Remote - HttpStreamable) Server hosted on Cloudflare Workers'
 
   - label: 'Fetch (Official)'
     name: 'Fetch'
+    category: 'General'
     url: 'https://remote.mcpservers.org/fetch/mcp'
     type: 'http'
     disabled: false

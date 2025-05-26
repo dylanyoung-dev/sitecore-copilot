@@ -1,3 +1,5 @@
+import { IHeaderConfig } from "./IHeaderConfig";
+
 export interface IYamlServerConfig {
   label: string;
   name: string;
@@ -8,7 +10,7 @@ export interface IYamlServerConfig {
   docUrl?: string;
   description: string;
   requiresHeaders?: boolean;
-  headers?: HeaderConfig[];
+  headers?: IHeaderConfig[];
   category?: string;
   tags?: string[];
 }
