@@ -10,8 +10,9 @@ import { useTokens } from '@/hooks/use-tokens';
 import { HeaderConfig, IMcpServer } from '@/models/IMcpServer';
 import { populateHeaderValues } from '@/utils/headerUtils';
 import { YamlServerConfig } from '@/utils/yamlUtils';
-import { AlertCircle, ChevronLeft, Info, Loader2, Plus, Power, Server, Settings, Trash2, X } from 'lucide-react';
-import { FC, useState } from 'react';
+import { AlertCircle, ChevronLeft, Info, Plus, Power, Server, Settings, Trash2, X } from 'lucide-react';
+import { FC, useEffect, useState } from 'react';
+import { PreconfiguredServerSelector } from './preconfigured-server-selector';
 
 interface AddMcpServerModalProps {
   open: boolean;
@@ -36,6 +37,15 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
   const { tokens } = useTokens();
   const { instances } = useInstances();
   const { preconfiguredServers, isLoading } = useMcpServers();
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+
+  useEffect(() => {
+    if (!selectedCategory && preconfiguredServers.length > 0) {
+      const categories = Array.from(new Set(preconfiguredServers.map((s: YamlServerConfig) => s.category || 'Other')));
+      setSelectedCategory(categories[0]);
+    }
+  }, [preconfiguredServers, selectedCategory]);
+
   // Reset when modal closes
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
@@ -152,63 +162,14 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
 
       case 'preconfigured':
         return (
-          <div className="space-y-3">
-            {' '}
-            <Button variant="ghost" size="sm" onClick={() => setMode('selection')} className="mb-2">
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Back
-            </Button>{' '}
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
-                <span className="ml-2 text-gray-500">Loading server configurations...</span>
-              </div>
-            ) : preconfiguredServers.length === 0 ? (
-              <div className="p-4 border rounded-lg border-yellow-200 bg-yellow-50">
-                <p className="text-sm text-yellow-800">
-                  No preconfigured servers available. Failed to load configurations.
-                </p>
-              </div>
-            ) : (
-              preconfiguredServers.map((server) => (
-                <div
-                  key={server.label}
-                  onClick={() => !server.disabled && handlePreconfiguredSelect(server)}
-                  className={`p-4 border rounded-lg transition-all ${
-                    server.disabled
-                      ? 'bg-gray-100 border-gray-200 cursor-not-allowed opacity-60'
-                      : 'hover:border-blue-500 hover:bg-blue-50 cursor-pointer'
-                  }`}
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold">{server.label}</h4>
-                    <div className="flex gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {server.type.toUpperCase()}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        {server.security.toUpperCase()}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">{server.description}</p>
-                  <p className="text-xs text-gray-500 font-mono">{server.url || 'URL not available'}</p>
-                  {server.docUrl && (
-                    <p className="text-xs text-gray-500 font-mono">
-                      <a
-                        href={server.docUrl}
-                        className={server.disabled ? 'pointer-events-none' : ''}
-                        onClick={(e) => server.disabled && e.preventDefault()}
-                      >
-                        Documentation
-                      </a>
-                    </p>
-                  )}
-                  {server.disabled && <p className="text-xs text-red-500 mt-2">This server is currently unavailable</p>}
-                </div>
-              ))
-            )}
-          </div>
+          <PreconfiguredServerSelector
+            preconfiguredServers={preconfiguredServers}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            isLoading={isLoading}
+            onBack={() => setMode('selection')}
+            onSelect={handlePreconfiguredSelect}
+          />
         );
 
       case 'custom':
@@ -416,7 +377,7 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Add MCP Server</DialogTitle>
           <DialogDescription>
@@ -451,12 +412,10 @@ const McpServerTable: FC<McpServerTableProps> = ({ servers, onDelete, onToggleAc
     <Table>
       <TableHeader>
         <TableRow>
-          {' '}
           <TableHead>Name</TableHead>
           <TableHead>URL</TableHead>
           <TableHead>Type</TableHead>
           <TableHead>Security</TableHead>
-          <TableHead>Headers</TableHead>
           <TableHead>Status</TableHead>
           <TableHead className="w-[80px]">Actions</TableHead>
         </TableRow>
@@ -473,32 +432,9 @@ const McpServerTable: FC<McpServerTableProps> = ({ servers, onDelete, onToggleAc
             <TableRow key={server.id}>
               <TableCell>{server.name}</TableCell>
               <TableCell>{server.url}</TableCell>
-              <TableCell className="uppercase">{server.type}</TableCell>{' '}
+              <TableCell className="uppercase">{server.type}</TableCell>
               <TableCell>
                 <Badge variant={server.security === 'open' ? 'default' : 'secondary'}>{server.security}</Badge>
-              </TableCell>
-              <TableCell>
-                {server.headers && server.headers.length > 0 ? (
-                  <Tooltip>
-                    <TooltipTrigger className="cursor-default">
-                      <Badge variant="outline" className="hover:bg-gray-50">
-                        {server.headers.length} {server.headers.length === 1 ? 'header' : 'headers'}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-sm">
-                      <div className="text-xs p-1">
-                        {server.headers.map((header, idx) => (
-                          <div key={idx} className="flex">
-                            <span className="font-mono">{header.key}:</span>
-                            <span className="font-mono ml-1 truncate max-w-[150px]">{header.value}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <span className="text-gray-400 text-xs">None</span>
-                )}
               </TableCell>
               <TableCell>
                 {server.isActive ? (
@@ -506,7 +442,7 @@ const McpServerTable: FC<McpServerTableProps> = ({ servers, onDelete, onToggleAc
                 ) : (
                   <Badge variant="destructive">Inactive</Badge>
                 )}
-              </TableCell>{' '}
+              </TableCell>
               <TableCell className="flex items-center justify-center">
                 <Tooltip>
                   <TooltipTrigger asChild>

@@ -1,5 +1,6 @@
-import { Eye, EyeOff, MoreHorizontal, Power, PowerOff, Trash2 } from 'lucide-react';
+import { Check, Copy, MoreHorizontal, Power, PowerOff, Trash2 } from 'lucide-react';
 import { FC, useState } from 'react';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,19 +33,24 @@ interface TokenTableProps {
 
 export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [visibleTokens, setVisibleTokens] = useState<string[]>([]);
-
-  const toggleTokenVisibility = (id: string) => {
-    setVisibleTokens((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]));
-  };
+  const [copiedTokenId, setCopiedTokenId] = useState<string | null>(null);
 
   const maskToken = (token: string) => '•'.repeat(20) + token.slice(-4);
 
+  const handleCopy = async (token: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(token);
+      setCopiedTokenId(id);
+      toast.success('Token copied to clipboard.');
+      setTimeout(() => setCopiedTokenId(null), 1500);
+    } catch {
+      toast.error('Could not copy token.');
+    }
+  };
+
   return (
     <>
-      {' '}
       <Table>
-        {' '}
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
@@ -56,7 +62,6 @@ export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {' '}
           {tokens.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
@@ -78,7 +83,7 @@ export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                </TableCell>{' '}
+                </TableCell>
                 <TableCell>
                   <Badge variant="secondary">{token.provider}</Badge>
                 </TableCell>
@@ -104,9 +109,13 @@ export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
                 </TableCell>
                 <TableCell className="font-mono">
                   <div className="flex items-center gap-2">
-                    {visibleTokens.includes(token.id) ? token.token : maskToken(token.token)}
-                    <Button variant="ghost" size="sm" onClick={() => toggleTokenVisibility(token.id)}>
-                      {visibleTokens.includes(token.id) ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {maskToken(token.token)}
+                    <Button variant="ghost" size="sm" onClick={() => handleCopy(token.token, token.id)}>
+                      {copiedTokenId === token.id ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </TableCell>

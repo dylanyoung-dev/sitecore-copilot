@@ -11,6 +11,8 @@ export interface YamlServerConfig {
   description: string;
   requiresHeaders?: boolean;
   headers?: HeaderConfig[];
+  category?: string;
+  tags?: string[];
 }
 
 export interface YamlMcpConfig {
