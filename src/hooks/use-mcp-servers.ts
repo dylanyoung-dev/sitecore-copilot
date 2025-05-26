@@ -1,12 +1,14 @@
 'use client';
 
-import { HeaderConfig, IMcpServer } from '@/models/IMcpServer';
-import { loadMcpServersConfigClient, YamlServerConfig } from '@/utils/yamlUtils';
+import { IHeaderConfig } from '@/models/IHeaderConfig';
+import { IMcpServer } from '@/models/IMcpServer';
+import { IYamlServerConfig } from '@/models/IYamlConfig';
+import { loadMcpServersConfigClient } from '@/utils/yamlUtils';
 import { useEffect, useState } from 'react';
 
 export function useMcpServers() {
   const [servers, setServers] = useState<IMcpServer[]>([]);
-  const [preconfiguredServers, setPreconfiguredServers] = useState<YamlServerConfig[]>([]);
+  const [preconfiguredServers, setPreconfiguredServers] = useState<IYamlServerConfig[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const LOCAL_STORAGE_KEY = 'mcp-servers';
@@ -63,7 +65,7 @@ export function useMcpServers() {
     return updatedServers.find((server) => server.id === id);
   };
 
-  const updateServerHeaders = (serverId: string, headers: HeaderConfig[]) => {
+  const updateServerHeaders = (serverId: string, headers: IHeaderConfig[]) => {
     const updatedServers = servers.map((server) => (server.id === serverId ? { ...server, headers } : server));
     setServers(updatedServers);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedServers));

@@ -10,6 +10,7 @@ servers:
     docUrl: 'https://github.com/dylanyoung-dev/sitecore-personalize-mcp-remote'
     description: 'Unofficial Sitecore Personalize MCP (Remote - HttpStreamable) Server hosted on Cloudflare Workers'
     requiresHeaders: true
+    category: 'Marketing'
     headers:
       - key: 'x-personalize-tenant-id'
         required: true
@@ -23,12 +24,14 @@ servers:
     url: ''
     type: 'http'
     security: 'open'
+    category: 'CMS'
     disabled: true
     docUrl: ''
     description: 'Unofficial Sitecore XMC Apps MCP (Remote - HttpStreamable) Server hosted on Cloudflare Workers'
 
   - label: 'Fetch (Official)'
     name: 'Fetch'
+    category: 'General'
     url: 'https://remote.mcpservers.org/fetch/mcp'
     type: 'http'
     disabled: false

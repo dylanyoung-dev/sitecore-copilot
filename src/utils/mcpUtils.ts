@@ -1,11 +1,11 @@
-import { HeaderConfig } from '@/models/IMcpServer';
+import { IHeaderConfig } from '@/models/IHeaderConfig';
 
 /**
  * Convert header configurations to a headers record
  * @param headers Array of header configurations
  * @returns Record of header key-value pairs
  */
-export function headersToRecord(headers: HeaderConfig[] = []): Record<string, string> {
+export function headersToRecord(headers: IHeaderConfig[] = []): Record<string, string> {
   const result: Record<string, string> = {};
 
   if (!headers || headers.length === 0) {

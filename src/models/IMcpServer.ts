@@ -1,3 +1,5 @@
+import { IHeaderConfig } from './IHeaderConfig';
+
 export interface IMcpServer {
   id: string;
   name: string;
@@ -10,19 +12,5 @@ export interface IMcpServer {
   tools?: string[];
   category?: string;
   tags?: string[];
-  headers?: HeaderConfig[];
-}
-
-export interface HeaderConfig {
-  key: string;
-  value: string;
-  required: boolean;
-
-  source?: {
-    type: 'token' | 'instance' | 'manual';
-    id?: string; // ID of the token or instance
-    field?: string; // Field to use from the source
-    instanceFilter?: string;
-    provider?: string;
-  };
+  headers?: IHeaderConfig[];
 }

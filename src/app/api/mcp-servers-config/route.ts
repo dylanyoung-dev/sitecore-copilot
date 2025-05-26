@@ -1,4 +1,4 @@
-import { YamlMcpConfig } from '@/utils/yamlUtils';
+import { IYamlMcpConfig } from '@/models/IYamlConfig';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { NextResponse } from 'next/server';
@@ -11,7 +11,7 @@ export async function GET() {
     const fileContents = fs.readFileSync(configPath, 'utf8');
 
     // Parse the YAML content
-    const config = yaml.load(fileContents) as YamlMcpConfig;
+    const config = yaml.load(fileContents) as IYamlMcpConfig;
     return NextResponse.json(config);
   } catch (error) {
     console.error('Error loading MCP servers config:', error);

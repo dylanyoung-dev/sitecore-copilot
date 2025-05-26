@@ -3,10 +3,10 @@ import { IMcpServer } from '@/models/IMcpServer';
 import { enumTokenProviders, IToken } from '@/models/IToken';
 import { getModelProvider } from '@/models/enumModels';
 import { headersToRecord } from '@/utils/mcpUtils';
-import { configureSitecorePersonalizeMcp } from '@/utils/sitecorePersonalizeUtils';
 import { createOpenAI } from '@ai-sdk/openai';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { experimental_createMCPClient, streamText } from 'ai';
+import { createAnthropic } from '@ai-sdk/anthropic';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -155,13 +155,10 @@ export async function POST(req: Request) {
           apiKey: tokenToUse.token,
         });
         break;
-
       case enumTokenProviders.Anthropic:
-        // For now, we'll use OpenAI but in a real implementation, you'd import and use the Anthropic client
-        aiClient = createOpenAI({
+        aiClient = createAnthropic({
           apiKey: tokenToUse.token,
         });
-        // TODO: Replace with proper Anthropic client when available
         break;
 
       default:

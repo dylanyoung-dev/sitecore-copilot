@@ -1,23 +1,4 @@
-import { HeaderConfig } from '@/models/IMcpServer';
-
-export interface YamlServerConfig {
-  label: string;
-  name: string;
-  url: string;
-  type: 'http' | 'sse';
-  security: 'open' | 'oauth';
-  disabled?: boolean;
-  docUrl?: string;
-  description: string;
-  requiresHeaders?: boolean;
-  headers?: HeaderConfig[];
-  category?: string;
-  tags?: string[];
-}
-
-export interface YamlMcpConfig {
-  servers: YamlServerConfig[];
-}
+import { IYamlMcpConfig } from '@/models/IYamlConfig';
 
 /**
  * Client-side function to load MCP server configurations
@@ -25,7 +6,7 @@ export interface YamlMcpConfig {
  *
  * @returns Promise resolving to YamlMcpConfig object
  */
-export const loadMcpServersConfigClient = async (): Promise<YamlMcpConfig> => {
+export const loadMcpServersConfigClient = async (): Promise<IYamlMcpConfig> => {
   try {
     const response = await fetch('/api/mcp-servers-config');
 

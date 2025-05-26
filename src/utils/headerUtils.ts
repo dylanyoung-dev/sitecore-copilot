@@ -1,15 +1,15 @@
+import { IHeaderConfig } from '@/models/IHeaderConfig';
 import { IInstance } from '@/models/IInstance';
-import { HeaderConfig } from '@/models/IMcpServer';
 import { IToken } from '@/models/IToken';
 
 /**
  * Populate header values from available tokens and instances
  */
 export function populateHeaderValues(
-  headers: HeaderConfig[],
+  headers: IHeaderConfig[],
   tokens: IToken[] = [],
   instances: IInstance[] = []
-): HeaderConfig[] {
+): IHeaderConfig[] {
   return headers.map((header) => {
     if (!header.source) return header;
 

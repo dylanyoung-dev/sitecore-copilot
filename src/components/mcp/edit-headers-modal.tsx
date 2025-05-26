@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { IHeaderConfig } from '@/models/IHeaderConfig';
 import { IInstance } from '@/models/IInstance';
-import { HeaderConfig, IMcpServer } from '@/models/IMcpServer';
+import { IMcpServer } from '@/models/IMcpServer';
 import { IToken } from '@/models/IToken';
 import { populateHeaderValues } from '@/utils/headerUtils';
 import { AlertCircle, Info, Plus, X } from 'lucide-react';
@@ -12,7 +13,7 @@ interface EditHeadersModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   server: IMcpServer | null;
-  onSave: (serverId: string, headers: HeaderConfig[]) => void;
+  onSave: (serverId: string, headers: IHeaderConfig[]) => void;
   tokens?: IToken[];
   instances?: IInstance[];
 }
@@ -25,8 +26,8 @@ const EditHeadersModal: FC<EditHeadersModalProps> = ({
   tokens = [],
   instances = [],
 }) => {
-  const [headers, setHeaders] = useState<HeaderConfig[]>([]);
-  const [newHeader, setNewHeader] = useState<HeaderConfig>({ key: '', value: '', required: false });
+  const [headers, setHeaders] = useState<IHeaderConfig[]>([]);
+  const [newHeader, setNewHeader] = useState<IHeaderConfig>({ key: '', value: '', required: false });
 
   useEffect(() => {
     if (server && open) {
@@ -53,7 +54,7 @@ const EditHeadersModal: FC<EditHeadersModalProps> = ({
     setHeaders(updatedHeaders);
   };
 
-  const handleHeaderChange = (index: number, field: keyof HeaderConfig, value: string | boolean) => {
+  const handleHeaderChange = (index: number, field: keyof IHeaderConfig, value: string | boolean) => {
     const updatedHeaders = [...headers];
     updatedHeaders[index] = {
       ...updatedHeaders[index],
