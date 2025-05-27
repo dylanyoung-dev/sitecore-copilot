@@ -35,5 +35,10 @@ export const useInstances = () => {
     return instances.find((instance) => instance.id === id);
   };
 
-  return { instances, addInstance, deleteInstance, getInstanceById };
+  const setAllInstances = (newInstances: IInstance[]) => {
+    setInstances(newInstances);
+    sessionStorage.setItem('instances', JSON.stringify(newInstances));
+  };
+
+  return { instances, addInstance, deleteInstance, getInstanceById, setAllInstances };
 };

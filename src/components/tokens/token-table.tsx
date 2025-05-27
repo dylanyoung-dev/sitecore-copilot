@@ -110,7 +110,12 @@ export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
                 <TableCell className="font-mono">
                   <div className="flex items-center gap-2">
                     {maskToken(token.token)}
-                    <Button variant="ghost" size="sm" onClick={() => handleCopy(token.token, token.id)}>
+                    <Button
+                      className="cursor-pointer"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCopy(token.token, token.id)}
+                    >
                       {copiedTokenId === token.id ? (
                         <Check className="h-4 w-4 text-green-500" />
                       ) : (
@@ -122,14 +127,14 @@ export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" className="cursor-pointer">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setDeleteId(token.id)}>
+                      <DropdownMenuItem onClick={() => setDeleteId(token.id)} className="cursor-pointer">
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete
                       </DropdownMenuItem>
@@ -150,7 +155,7 @@ export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 if (deleteId) {
@@ -158,6 +163,7 @@ export const TokenTable: FC<TokenTableProps> = ({ tokens, onDelete }) => {
                   setDeleteId(null);
                 }
               }}
+              className="cursor-pointer"
             >
               Delete
             </AlertDialogAction>

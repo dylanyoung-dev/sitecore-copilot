@@ -1,7 +1,7 @@
 'use client';
 
 import { AppSidebar } from '@/components/app-sidebar';
-import { EditHeadersModal } from '@/components/mcp/edit-headers-modal';
+import { EditHeadersModal } from '@/components/mcp/models/edit-headers';
 import { AddMcpServerModal } from '@/components/mcp/mcp-server-ui';
 import {
   Breadcrumb,
@@ -20,6 +20,7 @@ import { Separator } from '@radix-ui/react-separator';
 import { PlusCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { McpServerTable } from './mcp-server-table';
+import { Button } from '../ui/button';
 
 export default function McpServerConfigClient() {
   // All your existing component code...
@@ -104,11 +105,11 @@ export default function McpServerConfigClient() {
             <div className="p-6">
               <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold">MCP Server Configuration</h1>
-                <button className="cursor-pointer flex items-center" onClick={() => setIsModalOpen(true)}>
+                <Button className="cursor-pointer" onClick={() => setIsModalOpen(true)}>
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Add MCP Server
-                </button>
-              </div>{' '}
+                </Button>
+              </div>
               <AddMcpServerModal open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={handleAddServer} />
               <McpServerTable
                 servers={servers}

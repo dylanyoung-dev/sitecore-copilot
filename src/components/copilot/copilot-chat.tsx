@@ -30,6 +30,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
   const [selectedModel, setSelectedModel] = useState<string>('gpt-4o-mini');
   const [mcpServers, setMcpServers] = useState<IMcpServer[]>([]);
   const [sessionEnabledServers, setSessionEnabledServers] = useState<Record<string, boolean>>({});
+
   // Get available models based on all token providers
   useEffect(() => {
     if (tokens && tokens.length > 0) {
@@ -79,6 +80,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
       }
     }
   }, [tokens]);
+
   // Find the appropriate token for the selected model
   const getTokenForModel = () => {
     const modelInfo = availableModels.find((m) => m.id === selectedModel);
@@ -89,10 +91,11 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
     }
     return tokens.find((t) => t.active) || tokens[0]; // Fallback
   };
+
   const { messages, setMessages, input, handleInputChange, handleSubmit, isLoading } = useChat({
     api: '/api/chat',
     body: {
-      instanceData: selectedInstance,
+      instances: instances,
       tokenData: getTokenForModel(),
       allTokens: tokens,
       model: selectedModel,
@@ -214,25 +217,10 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
       <CardHeader className="px-4 py-3 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-primary" /> <CardTitle>Sitecore Copilot</CardTitle>
+            <Brain className="h-5 w-5 text-primary" /> <CardTitle>Copilot</CardTitle>
           </div>
           <div className="flex gap-2">
             {' '}
-            <Select
-              value={selectedInstance?.id}
-              onValueChange={(id) => setSelectedInstance(instances.find((i) => i.id === id))}
-            >
-              <SelectTrigger className="w-[180px] h-8 text-xs">
-                <SelectValue placeholder="Select instance" />
-              </SelectTrigger>
-              <SelectContent>
-                {instances.map((instance) => (
-                  <SelectItem key={instance.id} value={instance.id}>
-                    {instance.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>{' '}
             <Select value={selectedModel} onValueChange={(value: string) => setSelectedModel(value)}>
               <SelectTrigger className="w-[220px] h-8 text-xs">
                 <SelectValue placeholder="Select model" />

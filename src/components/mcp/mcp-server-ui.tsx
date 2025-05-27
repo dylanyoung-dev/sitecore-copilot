@@ -12,7 +12,7 @@ import { ChevronLeft, Server, Settings } from 'lucide-react';
 import { FC, useEffect, useState } from 'react';
 import { HeadersConfig } from './header-config-selector';
 import { PreconfiguredServerSelector } from './preconfigured-server-selector';
-import { McpServerTable } from './mcp-server-table';
+import { SelectionMode } from './selection-mcp-ui';
 
 interface AddMcpServerModalProps {
   open: boolean;
@@ -150,24 +150,10 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
     switch (mode) {
       case 'selection':
         return (
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <button
-              onClick={() => setMode('preconfigured')}
-              className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all group"
-            >
-              <Server className="h-8 w-8 mb-3 mx-auto text-gray-600 group-hover:text-blue-600" />
-              <h3 className="font-semibold mb-1">Preconfigured</h3>
-              <p className="text-sm text-gray-600">Choose from available MCP servers</p>
-            </button>
-            <button
-              onClick={() => setMode('custom')}
-              className="p-6 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all group"
-            >
-              <Settings className="h-8 w-8 mb-3 mx-auto text-gray-600 group-hover:text-green-600" />
-              <h3 className="font-semibold mb-1">Custom</h3>
-              <p className="text-sm text-gray-600">Configure your own MCP server</p>
-            </button>
-          </div>
+          <SelectionMode
+            onSelectPreconfigured={() => setMode('preconfigured')}
+            onSelectCustom={() => setMode('custom')}
+          />
         );
 
       case 'preconfigured':
@@ -250,6 +236,7 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
         return (
           <HeadersConfig
             headers={headers}
+            instances={instances}
             onHeadersChange={setHeaders}
             onBack={() => setMode('preconfigured')}
             onCancel={() => setMode('preconfigured')}

@@ -4,7 +4,10 @@ import { enumTokenProviders, IToken } from '@/models/IToken';
 import { getModelProvider } from '@/models/enumModels';
 import { headersToRecord } from '@/utils/mcpUtils';
 import { createOpenAI } from '@ai-sdk/openai';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import {
+  StreamableHTTPClientTransport,
+  StreamableHTTPClientTransportOptions,
+} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { experimental_createMCPClient, streamText } from 'ai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 
@@ -13,7 +16,7 @@ export const maxDuration = 30;
 
 interface ChatRequest {
   messages: any[];
-  instanceData: IInstance;
+  instances: IInstance[];
   tokenData: IToken; // Currently selected token
   allTokens?: IToken[]; // All available tokens
   model: string;
@@ -50,30 +53,35 @@ async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] =
 
         client = await experimental_createMCPClient(options);
       } else if (server.type === 'http') {
-        // For HTTP transports
-        const url = new URL(server.url);
-        let transport = new StreamableHTTPClientTransport(url);
+        try {
+          // Use the StreamableHTTPClientTransport with correct options structure
+          const url = new URL(server.url);
+          // Pass headers directly instead of using fetchOptions
+          const transportOptions: StreamableHTTPClientTransportOptions =
+            Object.keys(headers).length > 0
+              ? {
+                  requestInit: {
+                    method: 'POST',
+                    headers: { ...headers, 'Content-Type': 'application/json', Accept: 'application/json' },
+                  },
+                }
+              : {};
 
-        // Since we can't directly modify the transport headers,
-        // we'll create a new MCP client with the headers option
-        const options: any = {
-          transport: {
-            type: 'http',
-            url: server.url,
-          },
-        };
+          const transport = new StreamableHTTPClientTransport(url, transportOptions);
 
-        // Add headers if available
-        if (Object.keys(headers).length > 0) {
-          options.headers = headers;
+          client = await experimental_createMCPClient({
+            transport,
+          });
+        } catch (error) {
+          console.error(`Failed to initialize HTTP client for ${server.name}:`, error);
         }
-
-        client = await experimental_createMCPClient(options);
       }
 
       if (client) {
         clients.push({ client, server });
         const tools = await client.tools();
+
+        console.log(`Initialized MCP client for ${server.name} with tools:`, Object.keys(tools));
 
         // Add server name as prefix to avoid tool name conflicts
         // Use Record<string, any> for the prefixed tools
@@ -95,16 +103,14 @@ async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] =
 export async function POST(req: Request) {
   const {
     messages,
-    instanceData,
+    instances,
     tokenData,
     allTokens = [],
     model = 'gpt-4o-mini',
     mcpServers = [],
   }: ChatRequest = await req.json();
 
-  // Remove Sitecore-specific MCP server configuration.
   // Instead, just use the servers as provided (they should already have correct headers from YAML/config).
-  const instances = instanceData ? [instanceData] : [];
   const updatedMcpServers = mcpServers;
 
   // Get the model provider to ensure we're using the right token
@@ -128,7 +134,7 @@ export async function POST(req: Request) {
 
   console.log('Chat request:', {
     messages,
-    instanceData,
+    instances,
     tokenData: {
       name: tokenToUse.name,
       provider: tokenToUse.provider,

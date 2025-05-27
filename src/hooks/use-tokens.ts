@@ -54,5 +54,19 @@ export const useTokens = () => {
     localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedTokens));
   };
 
-  return { tokens, addToken, deleteToken, updateToken, getTokenById, getTokenByType, getActiveTokens };
+  const setAllTokens = (newTokens: IToken[]) => {
+    setTokens(newTokens);
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newTokens));
+  };
+
+  return {
+    tokens,
+    addToken,
+    deleteToken,
+    updateToken,
+    getTokenById,
+    getTokenByType,
+    getActiveTokens,
+    setAllTokens,
+  };
 };

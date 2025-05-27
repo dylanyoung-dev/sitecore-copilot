@@ -1,7 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { IHeaderConfig } from '@/models/IHeaderConfig';
-import { AlertCircle, ChevronLeft, Info, Plus, X } from 'lucide-react';
+import { IInstance } from '@/models/IInstance';
+import { AlertCircle, ChevronLeft, Info, Plus, X, KeyRound } from 'lucide-react';
 import { FC, useState } from 'react';
 
 interface HeadersConfigProps {
@@ -10,16 +13,24 @@ interface HeadersConfigProps {
   onBack: () => void;
   onSave: () => void;
   onCancel: () => void;
+  instances: IInstance[];
 }
 
-export const HeadersConfig: FC<HeadersConfigProps> = ({ headers, onHeadersChange, onBack, onSave, onCancel }) => {
+export const HeadersConfig: FC<HeadersConfigProps> = ({
+  headers,
+  onHeadersChange,
+  onBack,
+  onSave,
+  onCancel,
+  instances,
+}) => {
   const [newHeader, setNewHeader] = useState<IHeaderConfig>({
     key: '',
     value: '',
     required: false,
   });
 
-  const handleHeaderChange = (index: number, field: keyof IHeaderConfig, value: string | boolean) => {
+  const handleHeaderChange = (index: number, field: keyof IHeaderConfig, value: string | boolean | object) => {
     const updatedHeaders = [...headers];
     updatedHeaders[index] = { ...updatedHeaders[index], [field]: value };
     onHeadersChange(updatedHeaders);
@@ -64,9 +75,9 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({ headers, onHeadersChange
           <div className="space-y-2">
             {headers.map((header, index) => (
               <div key={index} className="flex items-center space-x-2 p-2 border rounded-md group">
-                <div className="flex-1 grid grid-cols-2 gap-2">
+                <div className="flex-1 grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs text-gray-500 block">Key</label>
+                    <label className="text-xs text-gray-500 block mb-2">Key</label>
                     <Input
                       value={header.key}
                       onChange={(e) => handleHeaderChange(index, 'key', e.target.value)}
@@ -75,17 +86,72 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({ headers, onHeadersChange
                     />
                   </div>
                   <div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between mb-2">
                       <label className="text-xs text-gray-500">Value</label>
                       {header.required && (
                         <span className="text-xs bg-red-100 text-red-800 px-1 rounded">Required</span>
                       )}
                     </div>
-                    <Input
-                      value={header.value}
-                      onChange={(e) => handleHeaderChange(index, 'value', e.target.value)}
-                      className={`text-sm ${header.required && !header.value ? 'border-red-300 bg-red-50' : ''}`}
-                    />
+                    <div className="relative flex">
+                      <Input
+                        value={
+                          header.source?.type === 'instance' && header.source.id
+                            ? `[Token from: ${instances.find((i) => i.id === header.source!.id)?.name || ''}]`
+                            : header.value
+                        }
+                        onChange={(e) => {
+                          handleHeaderChange(index, 'value', e.target.value);
+                          handleHeaderChange(index, 'source', { type: 'manual' });
+                        }}
+                        className={`text-sm pr-10 ${
+                          header.required && !header.value ? 'border-red-300 bg-red-50' : ''
+                        }`}
+                        disabled={header.source?.type === 'instance'}
+                      />
+                      <Popover>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <PopoverTrigger asChild>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="absolute right-1 top-1/2 -translate-y-1/2 z-10 border border-gray-300 h-7 w-7 cursor-pointer hover:bg-gray-100"
+                                aria-label="Insert Token"
+                              >
+                                <KeyRound className="h-3.5 w-3.5" />
+                              </Button>
+                            </PopoverTrigger>
+                            <TooltipContent>Add a Token</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <PopoverContent className="p-2 w-56">
+                          <div className="text-xs text-gray-500 mb-2">Insert token from instance:</div>
+                          {instances.length === 0 ? (
+                            <div className="text-sm text-gray-400">No instances available</div>
+                          ) : (
+                            <ul>
+                              {instances.map((inst) => (
+                                <li key={inst.id}>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-start"
+                                    onClick={() => {
+                                      handleHeaderChange(index, 'source', { type: 'instance', id: inst.id });
+                                      handleHeaderChange(index, 'value', '');
+                                    }}
+                                  >
+                                    {inst.name}
+                                  </Button>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </div>
                 </div>
                 <Button
@@ -102,13 +168,12 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({ headers, onHeadersChange
           </div>
         )}
 
-        {/* Add new header */}
         <div className="pt-2">
-          <h3 className="font-medium mb-2">Add Header</h3>
-          <div className="flex items-end space-x-2">
+          <h3 className="font-medium mb-2">Add Custom Header</h3>
+          <div className="flex items-end space-x-2 border rounded-md group p-2">
             <div className="flex-1 grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs text-gray-500 block">Key</label>
+                <label className="text-xs text-gray-500 block mb-2">Key</label>
                 <Input
                   value={newHeader.key}
                   onChange={(e) => setNewHeader({ ...newHeader, key: e.target.value })}
@@ -116,29 +181,29 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({ headers, onHeadersChange
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-500 block">Value</label>
+                <label className="text-xs text-gray-500 block mb-2">Value</label>
                 <Input
                   value={newHeader.value}
                   onChange={(e) => setNewHeader({ ...newHeader, value: e.target.value })}
                   placeholder="header-value"
                 />
               </div>
+              <div className="flex mt-2">
+                <label className="flex items-center text-xs text-gray-500">
+                  <input
+                    type="checkbox"
+                    checked={newHeader.required}
+                    onChange={(e) => setNewHeader({ ...newHeader, required: e.target.checked })}
+                    className="mr-1"
+                  />
+                  Required header
+                </label>
+              </div>
             </div>
             <Button onClick={handleAddHeader} disabled={!newHeader.key || !newHeader.value} size="sm">
               <Plus className="h-4 w-4 mr-1" />
               Add
             </Button>
-          </div>
-          <div className="flex mt-2">
-            <label className="flex items-center text-xs text-gray-500">
-              <input
-                type="checkbox"
-                checked={newHeader.required}
-                onChange={(e) => setNewHeader({ ...newHeader, required: e.target.checked })}
-                className="mr-1"
-              />
-              Required header
-            </label>
           </div>
         </div>
       </div>

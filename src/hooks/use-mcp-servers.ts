@@ -79,6 +79,12 @@ export function useMcpServers() {
   const getServerById = (id: string) => {
     return servers.find((server) => server.id === id);
   };
+
+  const setAllServers = (newServers: IMcpServer[]) => {
+    setServers(newServers);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newServers));
+  };
+
   return {
     servers,
     preconfiguredServers,
@@ -90,5 +96,6 @@ export function useMcpServers() {
     updateServerHeaders,
     getActiveServers,
     getServerById,
+    setAllServers,
   };
 }

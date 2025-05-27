@@ -9,48 +9,44 @@ export const getApiDefinitions = (): IApiDefinition[] => {
   const flags = featureFlags ? JSON.parse(featureFlags) : {};
 
   return [
-    ...(flags.enableExperienceChat
-      ? [
-          {
-            name: 'personalize',
-            label: 'Sitecore Experience (CDP/P)',
-            fields: [
-              {
-                name: 'environment',
-                label: 'Environment',
-                type: FieldTypes.Select,
-                required: true,
-                options: ['Nonprod', 'Production'],
-                distinct: true,
-                description:
-                  'Sitecore Personalize environments come with two default environments, either the nonprod or production.',
-              },
-              {
-                name: 'region',
-                label: 'Region',
-                type: FieldTypes.Select,
-                required: true,
-                options: ['APJ', 'EU', 'US'],
-                distinct: true,
-              },
-              {
-                name: 'clientId',
-                label: 'API Key',
-                type: FieldTypes.Text,
-                required: true,
-              },
-              {
-                name: 'clientSecret',
-                label: 'API Secret',
-                type: FieldTypes.Text,
-                required: true,
-              },
-            ],
-            apiType: ApiTypes.PersonalizeREST,
-            product: ProductTypes.Experience,
-          },
-        ]
-      : []),
+    {
+      name: 'personalize',
+      label: 'Sitecore Experience (CDP/P)',
+      fields: [
+        {
+          name: 'environment',
+          label: 'Environment',
+          type: FieldTypes.Select,
+          required: true,
+          options: ['Nonprod', 'Production'],
+          distinct: true,
+          description:
+            'Sitecore Personalize environments come with two default environments, either the nonprod or production.',
+        },
+        {
+          name: 'region',
+          label: 'Region',
+          type: FieldTypes.Select,
+          required: true,
+          options: ['APJ', 'EU', 'US'],
+          distinct: true,
+        },
+        {
+          name: 'clientId',
+          label: 'API Key',
+          type: FieldTypes.Text,
+          required: true,
+        },
+        {
+          name: 'clientSecret',
+          label: 'API Secret',
+          type: FieldTypes.Text,
+          required: true,
+        },
+      ],
+      apiType: ApiTypes.PersonalizeREST,
+      product: ProductTypes.Experience,
+    },
     {
       name: 'xmc-admin',
       label: 'Authoring/Management APIs',

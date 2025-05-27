@@ -54,6 +54,11 @@ const data = {
           title: 'API Tokens',
           url: '/settings/config',
         },
+        {
+          title: 'Import/Export',
+          url: '/settings/import',
+          icon: Settings,
+        },
       ],
     },
   ],

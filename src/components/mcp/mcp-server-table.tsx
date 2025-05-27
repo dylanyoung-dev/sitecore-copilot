@@ -63,6 +63,7 @@ export const McpServerTable: FC<McpServerTableProps> = ({ servers, onDelete, onT
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="cursor-pointer"
                       disabled={togglingId === server.id}
                       onClick={() => handleToggleActive(server.id)}
                       aria-label={server.isActive ? 'Deactivate MCP Server' : 'Activate MCP Server'}
@@ -78,6 +79,7 @@ export const McpServerTable: FC<McpServerTableProps> = ({ servers, onDelete, onT
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="cursor-pointer"
                         onClick={() => onEditHeaders(server)}
                         aria-label="Edit Headers"
                       >
@@ -87,7 +89,13 @@ export const McpServerTable: FC<McpServerTableProps> = ({ servers, onDelete, onT
                     <TooltipContent side="top">Edit Headers</TooltipContent>
                   </Tooltip>
                 )}
-                <Button variant="ghost" size="icon" onClick={() => onDelete(server.id)} aria-label="Delete MCP Server">
+                <Button
+                  variant="ghost"
+                  className="cursor-pointer"
+                  size="icon"
+                  onClick={() => onDelete(server.id)}
+                  aria-label="Delete MCP Server"
+                >
                   <Trash2 className="h-4 w-4 text-black" />
                 </Button>
               </TableCell>
