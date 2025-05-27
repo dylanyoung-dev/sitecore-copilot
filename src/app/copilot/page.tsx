@@ -12,24 +12,40 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { useInstances } from '@/hooks/use-instances';
-import { useTokens } from '@/hooks/use-tokens';
 import { IInstance } from '@/models/IInstance';
-import { enumTokenTypes, IToken } from '@/models/IToken';
+import { enumTokenCategories, IToken } from '@/models/IToken';
 import { Separator } from '@radix-ui/react-separator';
 import { useEffect, useState } from 'react';
 
 export default function CopilotPage() {
   const [instances, setInstances] = useState<IInstance[]>([]);
-  const [openAiToken, setOpenAIToken] = useState<IToken | undefined>();
-  const instanceStorage = useInstances();
-  const tokenStorage = useTokens();
+  const [aiTokens, setAiTokens] = useState<IToken[]>([]);
 
+  // Load instances
   useEffect(() => {
-    const openAIConfig = tokenStorage.getTokenByType(enumTokenTypes.OpenAI);
+    const saved = localStorage.getItem('instances');
+    if (saved) {
+      try {
+        const parsedInstances = JSON.parse(saved);
+        setInstances(parsedInstances);
+      } catch (error) {
+        console.error('Error parsing instances from localStorage:', error);
+      }
+    }
+  }, []);
 
-    if (openAIConfig) {
-      setOpenAIToken(openAIConfig);
+  // Load AI tokens
+  useEffect(() => {
+    const savedTokens = localStorage.getItem('api-tokens');
+    if (savedTokens) {
+      try {
+        const parsedTokens = JSON.parse(savedTokens);
+        // Filter tokens for AI category
+        const aiProviderTokens = parsedTokens.filter((token: IToken) => token.category === enumTokenCategories.AI);
+        setAiTokens(aiProviderTokens);
+      } catch (error) {
+        console.error('Error parsing tokens from localStorage:', error);
+      }
     }
   }, []);
 
@@ -53,17 +69,16 @@ export default function CopilotPage() {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-        </header>
-
+        </header>{' '}
         <div className="container mx-auto py-6 px-4">
           <div className="">
             <div className="p-6">
-              {openAiToken ? (
-                <CopilotChat token={openAiToken} instances={instances} />
+              {aiTokens.length > 0 ? (
+                <CopilotChat tokens={aiTokens} instances={instances} />
               ) : (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground">
-                    Please configure an OpenAI API token in settings to use the Copilot.
+                    Please configure an AI service token in settings to use the Copilot.
                   </p>
                 </div>
               )}

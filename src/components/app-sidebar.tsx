@@ -1,6 +1,6 @@
 'use client';
 
-import { BrainCircuit, HousePlug, Settings, SquareUserRound } from 'lucide-react';
+import { BrainCircuit, HousePlug, Server, Settings, SquareUserRound } from 'lucide-react';
 import * as React from 'react';
 
 import { NavMain } from '@/components/nav-main';
@@ -16,7 +16,7 @@ const data = {
   },
   teams: [
     {
-      name: 'Sitecore Copilot',
+      name: 'Copilot',
       logo: BrainCircuit,
     },
   ],
@@ -42,12 +42,22 @@ const data = {
           url: '/settings/instance',
         },
         {
+          title: 'Feature Flags',
+          url: '/settings/feature',
+        },
+        {
+          title: 'Configure MCP',
+          url: '/settings/mcp',
+          icon: Server,
+        },
+        {
           title: 'API Tokens',
           url: '/settings/config',
         },
         {
-          title: 'Feature Flags',
-          url: '/settings/feature',
+          title: 'Import/Export',
+          url: '/settings/import',
+          icon: Settings,
         },
       ],
     },

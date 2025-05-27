@@ -76,7 +76,7 @@ export const ListingTable: FC<ListingTableProps> = ({ instances, onDelete }) => 
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
                           <span className="sr-only">Open menu</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
@@ -84,7 +84,7 @@ export const ListingTable: FC<ListingTableProps> = ({ instances, onDelete }) => 
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleDeleteClick(instance.id)}>
+                        <DropdownMenuItem onClick={() => handleDeleteClick(instance.id)} className="cursor-pointer">
                           <Trash2 className="mr-2 h-4 w-4" />
                           Delete
                         </DropdownMenuItem>

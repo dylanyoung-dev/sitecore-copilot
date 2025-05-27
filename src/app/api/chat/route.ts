@@ -1,32 +1,180 @@
 import { IInstance } from '@/models/IInstance';
-import { IToken } from '@/models/IToken';
+import { IMcpServer } from '@/models/IMcpServer';
+import { enumTokenProviders, IToken } from '@/models/IToken';
+import { getModelProvider } from '@/models/enumModels';
+import { headersToRecord } from '@/utils/mcpUtils';
 import { createOpenAI } from '@ai-sdk/openai';
-import { streamText } from 'ai';
-import { z } from 'zod';
+import {
+  StreamableHTTPClientTransport,
+  StreamableHTTPClientTransportOptions,
+} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { experimental_createMCPClient, streamText } from 'ai';
+import { createAnthropic } from '@ai-sdk/anthropic';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
 interface ChatRequest {
   messages: any[];
-  instanceData: IInstance;
-  tokenData: IToken;
+  instances: IInstance[];
+  tokenData: IToken; // Currently selected token
+  allTokens?: IToken[]; // All available tokens
   model: string;
+  mcpServers?: IMcpServer[];
+}
+
+async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] = [], instances: IInstance[] = []) {
+  const activeServers = mcpServers.filter((server) => server.isActive);
+  const clients: Array<{ client: any; server: IMcpServer }> = [];
+  // Use Record<string, any> to properly type the dynamic keys
+  const toolSets: Record<string, any> = {};
+
+  for (const server of activeServers) {
+    try {
+      let client;
+
+      // Convert header configs to a simple header object
+      const headers = headersToRecord(server.headers);
+
+      // Create client based on transport type
+      if (server.type === 'sse') {
+        // For SSE transports
+        const options: any = {
+          transport: {
+            type: 'sse',
+            url: server.url,
+          },
+        };
+
+        // Add headers if we have any
+        if (Object.keys(headers).length > 0) {
+          options.transport.fetchOptions = { headers };
+        }
+
+        client = await experimental_createMCPClient(options);
+      } else if (server.type === 'http') {
+        try {
+          // Use the StreamableHTTPClientTransport with correct options structure
+          const url = new URL(server.url);
+          // Pass headers directly instead of using fetchOptions
+          const transportOptions: StreamableHTTPClientTransportOptions =
+            Object.keys(headers).length > 0
+              ? {
+                  requestInit: {
+                    method: 'POST',
+                    headers: { ...headers, 'Content-Type': 'application/json', Accept: 'application/json' },
+                  },
+                }
+              : {};
+
+          const transport = new StreamableHTTPClientTransport(url, transportOptions);
+
+          client = await experimental_createMCPClient({
+            transport,
+          });
+        } catch (error) {
+          console.error(`Failed to initialize HTTP client for ${server.name}:`, error);
+        }
+      }
+
+      if (client) {
+        clients.push({ client, server });
+        const tools = await client.tools();
+
+        console.log(`Initialized MCP client for ${server.name} with tools:`, Object.keys(tools));
+
+        // Add server name as prefix to avoid tool name conflicts
+        // Use Record<string, any> for the prefixed tools
+        const prefixedTools: Record<string, any> = {};
+        Object.entries(tools).forEach(([key, value]) => {
+          prefixedTools[`${server.name}_${key}`] = value;
+        });
+
+        Object.assign(toolSets, prefixedTools);
+      }
+    } catch (error) {
+      console.error(`Failed to initialize MCP client for ${server.name}:`, error);
+    }
+  }
+
+  return { clients, tools: toolSets };
 }
 
 export async function POST(req: Request) {
-  const { messages, instanceData, tokenData, model = 'gpt-4o-mini' }: ChatRequest = await req.json();
+  const {
+    messages,
+    instances,
+    tokenData,
+    allTokens = [],
+    model = 'gpt-4o-mini',
+    mcpServers = [],
+  }: ChatRequest = await req.json();
 
-  console.log('Chat request:', { messages, instanceData, tokenData, model });
+  // Instead, just use the servers as provided (they should already have correct headers from YAML/config).
+  const updatedMcpServers = mcpServers;
 
-  const openAiClient = createOpenAI({
-    apiKey: tokenData.token,
+  // Get the model provider to ensure we're using the right token
+  const modelProviderName = getModelProvider(model);
+
+  // Use the provided token or find the appropriate token for the model
+  let tokenToUse = tokenData;
+
+  // If allTokens is provided and model provider doesn't match token provider,
+  // try to find a matching token
+  if (allTokens.length > 0 && modelProviderName) {
+    // Find active token for this provider first
+    const matchingToken =
+      allTokens.find((t) => t.provider === modelProviderName.toLowerCase() && t.active) ||
+      allTokens.find((t) => t.provider === modelProviderName.toLowerCase());
+
+    if (matchingToken) {
+      tokenToUse = matchingToken;
+    }
+  }
+
+  console.log('Chat request:', {
+    messages,
+    instances,
+    tokenData: {
+      name: tokenToUse.name,
+      provider: tokenToUse.provider,
+      active: tokenToUse.active,
+    },
+    model,
+    mcpServers,
   });
+  try {
+    // Initialize MCP clients with all available context
+    const { clients, tools: mcpTools } = await initializeMcpClients(updatedMcpServers, allTokens, instances);
 
-  const systemPrompt = {
-    role: 'system',
-    content: `You are a Sitecore Operations expert assistant. 
-    You have access to the following Sitecore instance: ${JSON.stringify(instanceData)}.
+    // Create appropriate AI client based on token provider
+    let aiClient;
+
+    switch (tokenToUse.provider) {
+      case enumTokenProviders.OpenAI:
+        aiClient = createOpenAI({
+          apiKey: tokenToUse.token,
+        });
+        break;
+      case enumTokenProviders.Anthropic:
+        aiClient = createAnthropic({
+          apiKey: tokenToUse.token,
+        });
+        break;
+
+      default:
+        aiClient = createOpenAI({
+          apiKey: tokenToUse.token,
+        });
+    }
+
+    const tools: Record<string, any> = {
+      ...mcpTools,
+    };
+
+    const systemPrompt = {
+      role: 'system',
+      content: `You are a Sitecore Expert assistant. 
 
     Instructions
     - Always ask to confirm before running any functions
@@ -39,52 +187,16 @@ export async function POST(req: Request) {
     - Break up long responses with headings
     
     Respond concisely and focus on practical solutions.`,
-  };
+    };
+    const result = streamText({
+      model: aiClient(model),
+      messages: [systemPrompt, ...messages],
+      tools,
+      maxSteps: 3,
+    });
 
-  const result = streamText({
-    model: openAiClient(model),
-    messages: [systemPrompt, ...messages],
-    tools: {
-      get_content: {
-        description: 'Get content from a Sitecore instance',
-        parameters: z.object({
-          startItem: z.string().describe('The item to start exporting from, must be a valid Guid'),
-          templates: z.string().describe('The templates to export, must be a valid guid'),
-          fields: z.string().describe('The fields to export'),
-        }),
-        execute: async ({ startItem, templates, fields }) => {
-          try {
-            if (!instanceData || !instanceData.name) {
-              return {
-                result: {
-                  error: 'Invalid instance configuration',
-                },
-              };
-            }
-
-            // const fnResult = await GetContentExportResults(
-            //   instanceData.instanceType,
-            //   instanceData.graphQlEndpoint,
-            //   instanceData.apiToken,
-            //   startItem,
-            //   templates,
-            //   fields
-            // );
-            return {
-              result: { error: 'This function is not implemented' },
-            };
-          } catch (error) {
-            console.log(error);
-            return {
-              result: {
-                error: error instanceof Error ? error.message : 'An error occurred fetching content',
-              },
-            };
-          }
-        },
-      },
-    },
-  });
-
-  return result.toDataStreamResponse();
+    return result.toDataStreamResponse();
+  } catch (error) {
+    return new Response('Internal Server Error', { status: 500 });
+  }
 }
