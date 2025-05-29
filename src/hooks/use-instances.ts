@@ -1,34 +1,23 @@
 'use client';
 
 import { IInstance } from '@/models/IInstance';
-import { useEffect, useState } from 'react';
+import { useStorage } from '@/context/StorageContext';
 
 export const useInstances = () => {
-  const [instances, setInstances] = useState<IInstance[]>([]);
+  const { getData, setData } = useStorage();
+  const KEY = 'instances';
 
-  useEffect(() => {
-    const saved = sessionStorage.getItem('instances');
-
-    if (saved) {
-      try {
-        const parsedInstances = JSON.parse(saved) as IInstance[];
-        setInstances(parsedInstances);
-      } catch (error) {
-        console.error('Error parsing instances from sessionStorage:', error);
-      }
-    }
-  }, []);
+  const instances = getData<IInstance>(KEY);
 
   const addInstance = (instance: IInstance) => {
-    const updatedInstances = [...instances, instance];
-    setInstances(updatedInstances);
-    sessionStorage.setItem('instances', JSON.stringify(updatedInstances));
+    setData(KEY, [...instances, instance]);
   };
 
   const deleteInstance = (id: string) => {
-    const updatedInstances = instances.filter((instance) => instance.id !== id);
-    setInstances(updatedInstances);
-    sessionStorage.setItem('instances', JSON.stringify(updatedInstances));
+    setData(
+      KEY,
+      instances.filter((instance) => instance.id !== id)
+    );
   };
 
   const getInstanceById = (id: string): IInstance | undefined => {
@@ -36,8 +25,7 @@ export const useInstances = () => {
   };
 
   const setAllInstances = (newInstances: IInstance[]) => {
-    setInstances(newInstances);
-    sessionStorage.setItem('instances', JSON.stringify(newInstances));
+    setData(KEY, newInstances);
   };
 
   return { instances, addInstance, deleteInstance, getInstanceById, setAllInstances };

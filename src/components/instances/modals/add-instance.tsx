@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getApiDefinitions } from '@/data/apiDefinitions';
+import { useInstances } from '@/hooks/use-instances';
 import { FieldTypes, IFieldDefinition, IInstance, ProductTypes } from '@/models/IInstance';
 import { FC, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -14,24 +15,14 @@ interface AddInstanceModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const getExistingInstances = (): IInstance[] => {
-  if (typeof window === 'undefined') return []; // Ensure this runs only on the client side
-  const storedInstances = sessionStorage.getItem('instances');
-  return storedInstances ? JSON.parse(storedInstances) : [];
-};
-
 export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange }) => {
-  const [existingInstances, setExistingInstances] = useState<IInstance[]>();
+  const { instances, addInstance } = useInstances();
   const { control, handleSubmit, watch, setValue } = useForm<IInstance>({
     defaultValues: {
       product: undefined,
       fields: {},
     },
   });
-
-  useEffect(() => {
-    setExistingInstances(getExistingInstances());
-  }, []);
 
   const product = watch('product');
   const apiType = watch('apiType');
@@ -44,7 +35,7 @@ export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange
       return;
     }
 
-    const hasDuplicate = existingInstances?.some((instance) => {
+    const hasDuplicate = instances?.some((instance) => {
       if (instance.apiType !== apiType || instance.product !== product) return false;
 
       // Check distinct fields
@@ -65,9 +56,7 @@ export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange
     console.log('Configured Instance:', instance);
 
     // Save the instance to sessionStorage
-    const updatedInstances = [...(existingInstances || []), instance];
-    sessionStorage.setItem('instances', JSON.stringify(updatedInstances));
-    setExistingInstances(updatedInstances);
+    addInstance(instance);
 
     // Close the modal
     onOpenChange(false);
@@ -186,7 +175,13 @@ export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange
             ))}
 
           {/* Submit Button */}
-          <div className="mt-4">{product && apiType && <Button type="submit">Submit</Button>}</div>
+          <div className="mt-4">
+            {product && apiType && (
+              <Button type="submit" className="cursor-pointer">
+                Submit
+              </Button>
+            )}
+          </div>
         </form>
       </DialogContent>
     </Dialog>

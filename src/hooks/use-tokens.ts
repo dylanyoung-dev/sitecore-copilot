@@ -1,40 +1,29 @@
 'use client';
 
+import { useStorage } from '@/context/StorageContext';
 import { enumTokenCategories, enumTokenProviders, enumTokenTypes, IToken } from '@/models/IToken';
-import { useEffect, useState } from 'react';
 
 export const useTokens = () => {
-  const [tokens, setTokens] = useState<IToken[]>([]);
-  const SESSION_STORAGE_KEY = 'api-tokens';
+  const { getData, setData } = useStorage();
+  const KEY = 'tokens';
 
-  useEffect(() => {
-    const saved = localStorage.getItem(SESSION_STORAGE_KEY);
-
-    if (saved) {
-      try {
-        const parsedTokens = JSON.parse(saved) as IToken[];
-        setTokens(parsedTokens);
-      } catch (error) {
-        console.error('Error parsing instances from sessionStorage:', error);
-      }
-    }
-  }, []);
+  const tokens = getData<IToken>(KEY);
 
   const addToken = (token: IToken) => {
-    const updatedTokens = [...tokens, token];
-    setTokens(updatedTokens);
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedTokens));
+    setData(KEY, [...tokens, token]);
   };
 
   const deleteToken = (id: string) => {
-    const updatedTokens = tokens.filter((token) => token.id !== id);
-    setTokens(updatedTokens);
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedTokens));
+    setData(
+      KEY,
+      tokens.filter((token) => token.id !== id)
+    );
   };
 
   const getTokenById = (id: string): IToken | undefined => {
     return tokens.find((token) => token.id === id);
   };
+
   const getTokenByType = (type: enumTokenTypes): IToken | undefined => {
     return tokens.find((token) => token.type === type);
   };
@@ -49,14 +38,14 @@ export const useTokens = () => {
   };
 
   const updateToken = (updatedToken: IToken) => {
-    const updatedTokens = tokens.map((token) => (token.id === updatedToken.id ? updatedToken : token));
-    setTokens(updatedTokens);
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedTokens));
+    setData(
+      KEY,
+      tokens.map((token) => (token.id === updatedToken.id ? updatedToken : token))
+    );
   };
 
   const setAllTokens = (newTokens: IToken[]) => {
-    setTokens(newTokens);
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newTokens));
+    setData(KEY, newTokens);
   };
 
   return {

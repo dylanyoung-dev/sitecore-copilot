@@ -1,5 +1,6 @@
 'use client';
 
+import { useStorage } from '@/context/StorageContext';
 import { IHeaderConfig } from '@/models/IHeaderConfig';
 import { IMcpServer } from '@/models/IMcpServer';
 import { IYamlServerConfig } from '@/models/IYamlConfig';
@@ -7,21 +8,15 @@ import { loadMcpServersConfigClient } from '@/utils/yamlUtils';
 import { useEffect, useState } from 'react';
 
 export function useMcpServers() {
-  const [servers, setServers] = useState<IMcpServer[]>([]);
+  const { getData, setData } = useStorage();
+  const KEY = 'mcpServers';
+
+  const servers = getData<IMcpServer>(KEY);
   const [preconfiguredServers, setPreconfiguredServers] = useState<IYamlServerConfig[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const LOCAL_STORAGE_KEY = 'mcp-servers';
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) {
-        setServers(JSON.parse(saved));
-      }
-    } catch (error) {
-      console.error('Error loading MCP servers:', error);
-    }
 
+  useEffect(() => {
     // Load preconfigured servers from YAML
     const loadPreconfiguredServers = async () => {
       setIsLoading(true);
@@ -45,30 +40,28 @@ export function useMcpServers() {
       id: crypto.randomUUID(),
     };
     const updatedServers = [...servers, newServer];
-    setServers(updatedServers);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedServers));
+    setData(KEY, updatedServers);
     return newServer;
   };
 
   const deleteServer = (id: string) => {
-    const updatedServers = servers.filter((server) => server.id !== id);
-    setServers(updatedServers);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedServers));
+    setData(
+      KEY,
+      servers.filter((server) => server.id !== id)
+    );
   };
 
   const toggleServerActive = (id: string) => {
     const updatedServers = servers.map((server) =>
       server.id === id ? { ...server, isActive: !server.isActive } : server
     );
-    setServers(updatedServers);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedServers));
+    setData(KEY, updatedServers);
     return updatedServers.find((server) => server.id === id);
   };
 
   const updateServerHeaders = (serverId: string, headers: IHeaderConfig[]) => {
     const updatedServers = servers.map((server) => (server.id === serverId ? { ...server, headers } : server));
-    setServers(updatedServers);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedServers));
+    setData(KEY, updatedServers);
     return updatedServers.find((server) => server.id === serverId);
   };
 
@@ -81,8 +74,7 @@ export function useMcpServers() {
   };
 
   const setAllServers = (newServers: IMcpServer[]) => {
-    setServers(newServers);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newServers));
+    setData(KEY, newServers);
   };
 
   return {

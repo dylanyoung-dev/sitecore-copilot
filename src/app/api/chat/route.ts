@@ -4,10 +4,6 @@ import { enumTokenProviders, IToken } from '@/models/IToken';
 import { getModelProvider } from '@/models/enumModels';
 import { headersToRecord } from '@/utils/mcpUtils';
 import { createOpenAI } from '@ai-sdk/openai';
-import {
-  StreamableHTTPClientTransport,
-  StreamableHTTPClientTransportOptions,
-} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { experimental_createMCPClient, streamText } from 'ai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 
@@ -29,6 +25,8 @@ async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] =
   // Use Record<string, any> to properly type the dynamic keys
   const toolSets: Record<string, any> = {};
 
+  console.log('activeServers: ', JSON.stringify(activeServers, null, 2));
+
   for (const server of activeServers) {
     try {
       let client;
@@ -43,35 +41,27 @@ async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] =
           transport: {
             type: 'sse',
             url: server.url,
+            headers: headers,
           },
         };
 
-        // Add headers if we have any
-        if (Object.keys(headers).length > 0) {
-          options.transport.fetchOptions = { headers };
-        }
+        console.log('options: ', JSON.stringify(options, null, 2));
 
         client = await experimental_createMCPClient(options);
       } else if (server.type === 'http') {
         try {
           // Use the StreamableHTTPClientTransport with correct options structure
-          const url = new URL(server.url);
-          // Pass headers directly instead of using fetchOptions
-          const transportOptions: StreamableHTTPClientTransportOptions =
-            Object.keys(headers).length > 0
-              ? {
-                  requestInit: {
-                    method: 'POST',
-                    headers: { ...headers, 'Content-Type': 'application/json', Accept: 'application/json' },
-                  },
-                }
-              : {};
+          const options: any = {
+            transport: {
+              type: 'http',
+              url: server.url,
+              headers,
+            },
+          };
 
-          const transport = new StreamableHTTPClientTransport(url, transportOptions);
+          console.log('options: ', JSON.stringify(options, null, 2));
 
-          client = await experimental_createMCPClient({
-            transport,
-          });
+          client = await experimental_createMCPClient(options);
         } catch (error) {
           console.error(`Failed to initialize HTTP client for ${server.name}:`, error);
         }
@@ -145,6 +135,7 @@ export async function POST(req: Request) {
   });
   try {
     // Initialize MCP clients with all available context
+    console.log('mcpTools: ', mcpServers);
     const { clients, tools: mcpTools } = await initializeMcpClients(updatedMcpServers, allTokens, instances);
 
     // Create appropriate AI client based on token provider

@@ -13,62 +13,18 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { useInstances } from '@/hooks/use-instances';
 import { IInstance } from '@/models/IInstance';
 import { Separator } from '@radix-ui/react-separator';
 import { PlusCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function InstanceSetupPage() {
-  const [instances, setInstances] = useState<IInstance[]>([]);
-
-  useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem('instances');
-      if (saved) {
-        const parsedInstances = JSON.parse(saved) as IInstance[];
-        setInstances(parsedInstances);
-      }
-    } catch (error) {
-      console.error('Error loading instances:', error);
-    }
-  }, []);
-
-  const [isGenModalOpen, setIsGenModalOpen] = useState(false);
-  const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
+  const { instances, addInstance, deleteInstance } = useInstances();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const handleAddInstance = async (newInstance: Omit<IInstance, 'id'>) => {
-    try {
-      // if (newInstance.instanceType === enumInstanceType.xmc) {
-      //   const tokenResponse = await getXmCloudToken(newInstance.clientId as string, newInstance.clientSecret as string);
-
-      //   newInstance.apiToken = tokenResponse.access_token;
-
-      //   // Store token expiration if needed
-      //   newInstance.expiration = new Date(Date.now() + tokenResponse.expires_in * 1000).toISOString();
-      // }
-
-      const instance: IInstance = {
-        ...newInstance,
-        id: crypto.randomUUID(),
-      };
-
-      const updatedInstances = [...instances, instance];
-      setInstances(updatedInstances);
-      sessionStorage.setItem('instances', JSON.stringify(updatedInstances));
-      setIsTokenModalOpen(false);
-      setIsGenModalOpen(false);
-    } catch (error) {
-      console.error('Error adding instance:', error);
-    }
-  };
-
   const handleDeleteInstance = (id: string) => {
-    const updatedInstances = instances.filter((instance) => instance.id !== id);
-    setInstances(updatedInstances);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('instances', JSON.stringify(updatedInstances));
-    }
+    deleteInstance(id);
   };
 
   return (

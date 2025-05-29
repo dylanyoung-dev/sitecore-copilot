@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { FeatureFlagProvider } from '../context/FeatureFlagContext';
 import './globals.css';
+import { StorageProvider } from '@/context/StorageContext';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -24,10 +25,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <FeatureFlagProvider>
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
-      </html>
-    </FeatureFlagProvider>
+    <StorageProvider>
+      <FeatureFlagProvider>
+        <html lang="en">
+          <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+        </html>
+      </FeatureFlagProvider>
+    </StorageProvider>
   );
 }

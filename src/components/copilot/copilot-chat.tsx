@@ -150,8 +150,6 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
     setShowTools(false);
   };
 
-  console.log('messages', messages);
-
   // Reference to the messages div for scrolling
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);

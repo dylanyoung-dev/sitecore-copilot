@@ -30,9 +30,20 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
     required: false,
   });
 
-  const handleHeaderChange = (index: number, field: keyof IHeaderConfig, value: string | boolean | object) => {
+  // Add state to control popover visibility
+  const [open, setOpen] = useState<Record<number, boolean>>({});
+
+  const handleHeaderChange = (index: number, field: keyof IHeaderConfig, value: any) => {
+    console.log(`Updating header at index ${index}, field: ${field}, value:`, value);
     const updatedHeaders = [...headers];
-    updatedHeaders[index] = { ...updatedHeaders[index], [field]: value };
+
+    // Handle nested properties properly
+    if (field === 'source') {
+      updatedHeaders[index] = { ...updatedHeaders[index], source: value };
+    } else {
+      updatedHeaders[index] = { ...updatedHeaders[index], [field]: value };
+    }
+
     onHeadersChange(updatedHeaders);
   };
 
@@ -68,7 +79,7 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
 
       {/* Headers list */}
       <div className="space-y-4">
-        <h3 className="font-medium">Current Headers</h3>
+        <h3 className="font-medium">Required Headers</h3>
         {headers.length === 0 ? (
           <p className="text-sm text-gray-500 italic">No headers configured yet</p>
         ) : (
@@ -93,22 +104,42 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
                       )}
                     </div>
                     <div className="relative flex">
-                      <Input
-                        value={
-                          header.source?.type === 'instance' && header.source.id
-                            ? `[Token from: ${instances.find((i) => i.id === header.source!.id)?.name || ''}]`
-                            : header.value
-                        }
-                        onChange={(e) => {
-                          handleHeaderChange(index, 'value', e.target.value);
-                          handleHeaderChange(index, 'source', { type: 'manual' });
-                        }}
-                        className={`text-sm pr-10 ${
-                          header.required && !header.value ? 'border-red-300 bg-red-50' : ''
-                        }`}
-                        disabled={header.source?.type === 'instance'}
-                      />
-                      <Popover>
+                      {header.source?.type === 'instance' && header.source.id ? (
+                        <div className="relative w-full">
+                          <div className="flex items-center h-10 px-3 py-2 text-sm rounded-md border border-input bg-background text-muted-foreground">
+                            <div className="flex-1 overflow-hidden">
+                              <div className="inline-flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-xs">
+                                <KeyRound className="h-3 w-3 mr-1" />
+                                {instances.find((i) => i.id === header.source!.id)?.name || 'Unknown'}
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                handleHeaderChange(index, 'source', { type: 'manual' });
+                                handleHeaderChange(index, 'value', '');
+                              }}
+                              className="cursor-point ml-1 h-5 w-5 p-0 rounded-full"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Input
+                          value={header.value}
+                          onChange={(e) => {
+                            handleHeaderChange(index, 'value', e.target.value);
+                            handleHeaderChange(index, 'source', { type: 'manual' });
+                          }}
+                          className={`text-sm pr-10 ${
+                            header.required && !header.value ? 'border-red-300 bg-red-50' : ''
+                          }`}
+                        />
+                      )}
+                      <Popover open={open[index]} onOpenChange={(isOpen) => setOpen({ ...open, [index]: isOpen })}>
                         <TooltipProvider>
                           <Tooltip>
                             <PopoverTrigger asChild>
@@ -139,8 +170,15 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
                                     size="sm"
                                     className="w-full justify-start"
                                     onClick={() => {
+                                      // Update source first
                                       handleHeaderChange(index, 'source', { type: 'instance', id: inst.id });
-                                      handleHeaderChange(index, 'value', '');
+
+                                      // Set the header value to use instance ID as the actual value
+                                      // This will be used when constructing headers for API calls
+                                      handleHeaderChange(index, 'value', inst.fields?.token || inst.id);
+
+                                      // Close the popover
+                                      setOpen({ ...open, [index]: false });
                                     }}
                                   >
                                     {inst.name}
@@ -154,15 +192,6 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
                     </div>
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleRemoveHeader(index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
             ))}
           </div>
