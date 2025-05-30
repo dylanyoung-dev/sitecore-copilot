@@ -6,16 +6,17 @@ import { enumTokenProviders, IToken } from '@/models/IToken';
 interface ModelSelectorProps {
   tokens: IToken[];
   onModelChange: (value: string) => void;
+  selectedModel: string;
   defaultModel?: string;
 }
 
 export const ModelSelector: React.FC<ModelSelectorProps> = ({
   tokens,
   onModelChange,
+  selectedModel,
   defaultModel = 'gpt-4o-mini',
 }) => {
   const [availableModels, setAvailableModels] = useState<{ id: string; name: string; provider: string }[]>([]);
-  const [selectedModel, setSelectedModel] = useState<string>(defaultModel);
 
   // Process tokens and populate models
   useEffect(() => {
@@ -56,23 +57,19 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
 
       setAvailableModels(uniqueModels);
 
-      // Set default model
-      const defaultModelObj = uniqueModels.find((m) => m.id === defaultModel) || uniqueModels[0];
-      if (defaultModelObj) {
-        setSelectedModel(defaultModelObj.id);
-        onModelChange(defaultModelObj.id);
+      // Only set default model if no selection exists
+      if (!selectedModel && defaultModel) {
+        const defaultModelObj = uniqueModels.find((m) => m.id === defaultModel) || uniqueModels[0];
+        if (defaultModelObj) {
+          onModelChange(defaultModelObj.id);
+        }
       }
     }
-  }, [tokens, defaultModel, onModelChange]);
-
-  const handleValueChange = (value: string) => {
-    setSelectedModel(value);
-    onModelChange(value);
-  };
+  }, [tokens, defaultModel, onModelChange, selectedModel]);
 
   return (
-    <Select value={selectedModel} onValueChange={handleValueChange}>
-      <SelectTrigger className="w-[220px] h-8 text-xs">
+    <Select value={selectedModel} onValueChange={onModelChange}>
+      <SelectTrigger className="w-[220px] h-8 text-xs cursor-pointer">
         <SelectValue placeholder="Select model" />
       </SelectTrigger>
       <SelectContent>
@@ -88,7 +85,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
           <div key={provider}>
             <div className="px-2 py-1.5 text-xs font-semibold bg-muted/50">{provider.toUpperCase()}</div>
             {models.map((model) => (
-              <SelectItem key={model.id} value={model.id}>
+              <SelectItem key={model.id} value={model.id} className="cursor-pointer">
                 {model.name}
               </SelectItem>
             ))}

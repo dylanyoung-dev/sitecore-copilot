@@ -48,6 +48,7 @@ export const AddInstanceModal: FC<AddInstanceModalProps> = ({ open, onOpenChange
       id: crypto.randomUUID(),
       name: data.name,
       apiType,
+      apiDefinitionId: selectedApiDefinition.id, // Add apiDefinitionId from the selected definition
       fields: data.fields,
       isActive: !hasDuplicate,
       product,

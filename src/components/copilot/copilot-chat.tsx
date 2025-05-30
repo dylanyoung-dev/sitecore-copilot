@@ -123,6 +123,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
           <div className="flex gap-2">
             <ModelSelector
               tokens={tokens}
+              selectedModel={selectedModel} // Pass the current selected model
               onModelChange={(value: string) => setSelectedModel(value)}
               defaultModel="gpt-4o-mini"
             />
@@ -167,6 +168,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
                     sessionEnabledServers={sessionEnabledServers}
                     setSessionEnabledServers={setSessionEnabledServers}
                     handleToolSelect={handleToolSelect}
+                    instances={instances}
                     triggerElement={
                       <Button
                         type="button"
