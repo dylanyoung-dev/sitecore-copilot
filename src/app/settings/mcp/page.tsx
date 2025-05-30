@@ -1,5 +1,5 @@
-import McpServerConfigClient from "@/components/mcp/mcp-serverconfig-client"
+import McpServerComponent from '@/components/mcp/mcp-server-component';
 
 export default function McpServerConfigPage() {
-  return <McpServerConfigClient />
+  return <McpServerComponent />;
 }

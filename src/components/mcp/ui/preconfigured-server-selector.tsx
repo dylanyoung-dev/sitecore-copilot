@@ -25,10 +25,10 @@ export const PreconfiguredServerSelector: FC<Props> = ({
   const filteredServers = preconfiguredServers.filter((s) => (s.category || 'Other') === selectedCategory);
 
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6 h-[calc(100vh-14rem)]">
       {/* Category Selector */}
-      <div className="w-40">
-        <div className="font-semibold mb-2">Categories</div>
+      <div className="w-40 overflow-y-auto">
+        <div className="font-semibold mb-2 sticky top-0 bg-background py-1">Categories</div>
         <ul className="space-y-1">
           {categories.map((cat) => (
             <li key={cat}>
@@ -45,8 +45,8 @@ export const PreconfiguredServerSelector: FC<Props> = ({
         </ul>
       </div>
       {/* Server List */}
-      <div className="flex-1 space-y-3">
-        <Button variant="ghost" size="sm" onClick={onBack} className="mb-2">
+      <div className="flex-1 space-y-3 overflow-y-auto pr-2">
+        <Button variant="ghost" size="sm" onClick={onBack} className="mb-2 sticky top-0 z-10 bg-background">
           <ChevronLeft className="h-4 w-4 mr-1" />
           Back
         </Button>

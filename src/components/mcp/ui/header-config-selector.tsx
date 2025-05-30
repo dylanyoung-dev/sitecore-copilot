@@ -10,7 +10,7 @@ import { getApiDefinitions } from '@/data/apiDefinitions';
 import { IMcpServer } from '@/models/IMcpServer';
 import { TokenInput } from '@/components/token-input';
 
-interface HeadersConfigProps {
+interface HeaderConfigSelectorProps {
   headers: IHeaderConfig[];
   onHeadersChange: (headers: IHeaderConfig[]) => void;
   onBack: () => void;
@@ -27,7 +27,7 @@ const getFieldsForServer = (apiDefinitionId: string) => {
   return def?.fields || [];
 };
 
-export const HeadersConfig: FC<HeadersConfigProps> = ({
+export const HeaderConfigSelector: FC<HeaderConfigSelectorProps> = ({
   headers,
   onHeadersChange,
   onBack,

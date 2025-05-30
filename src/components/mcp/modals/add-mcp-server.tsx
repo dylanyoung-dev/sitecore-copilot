@@ -10,9 +10,10 @@ import { IYamlServerConfig } from '@/models/IYamlConfig';
 import { populateHeaderValues } from '@/utils/headerUtils';
 import { ChevronLeft, Server, Settings } from 'lucide-react';
 import { FC, useEffect, useState } from 'react';
-import { HeadersConfig } from './header-config-selector';
-import { PreconfiguredServerSelector } from './preconfigured-server-selector';
-import { SelectionMode } from './selection-mcp-ui';
+import { SelectionMcpType } from '../ui/selection-mcp-type';
+import { PreconfiguredServerSelector } from '../ui/preconfigured-server-selector';
+import { HeaderConfigSelector } from '../ui/header-config-selector';
+import Head from 'next/head';
 
 interface AddMcpServerModalProps {
   open: boolean;
@@ -137,9 +138,6 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
       headers: headers.length > 0 ? headers : form.headers,
     };
 
-    console.log('Submitting MCP Server:', finalForm);
-
-    //onSubmit(finalForm);
     handleOpenChange(false);
   };
 
@@ -147,7 +145,7 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
     switch (mode) {
       case 'selection':
         return (
-          <SelectionMode
+          <SelectionMcpType
             onSelectPreconfigured={() => setMode('preconfigured')}
             onSelectCustom={() => setMode('custom')}
           />
@@ -231,7 +229,7 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
 
       case 'headers':
         return (
-          <HeadersConfig
+          <HeaderConfigSelector
             headers={headers}
             instances={instances}
             onHeadersChange={setHeaders}

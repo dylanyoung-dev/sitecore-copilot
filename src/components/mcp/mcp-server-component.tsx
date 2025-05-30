@@ -1,8 +1,8 @@
 'use client';
 
 import { AppSidebar } from '@/components/app-sidebar';
-import { EditHeadersModal } from '@/components/mcp/models/edit-headers';
-import { AddMcpServerModal } from '@/components/mcp/mcp-server-ui';
+import { EditHeadersModal } from '@/components/mcp/modals/edit-headers';
+import { AddMcpServerModal } from '@/components/mcp/modals/add-mcp-server';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,56 +14,35 @@ import {
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { useInstances } from '@/hooks/use-instances';
 import { useTokens } from '@/hooks/use-tokens';
-import { IHeaderConfig } from '@/models/IHeaderConfig';
-import { IMcpServer } from '@/models/IMcpServer';
+import { useMcpServers } from '@/hooks/use-mcp-servers';
 import { Separator } from '@radix-ui/react-separator';
 import { PlusCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { McpServerTable } from './mcp-server-table';
+import { useState } from 'react';
 import { Button } from '../ui/button';
+import { IMcpServer } from '@/models/IMcpServer';
+import { IHeaderConfig } from '@/models/IHeaderConfig';
+import { McpServerTable } from './ui/table';
 
-export default function McpServerConfigClient() {
-  // All your existing component code...
-  const [servers, setServers] = useState<IMcpServer[]>([]);
+export default function McpServerComponent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isHeadersModalOpen, setIsHeadersModalOpen] = useState(false);
   const [selectedServer, setSelectedServer] = useState<IMcpServer | null>(null);
   const { tokens } = useTokens();
   const { instances } = useInstances();
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('mcp-servers');
-      if (saved) {
-        setServers(JSON.parse(saved));
-      }
-    } catch (error) {
-      console.error('Error loading MCP servers:', error);
-    }
-  }, []);
+  const { servers, isLoading, addServer, deleteServer, toggleServerActive, updateServerHeaders } = useMcpServers();
 
   const handleAddServer = (newServer: Omit<IMcpServer, 'id'>) => {
-    const server: IMcpServer = {
-      ...newServer,
-      id: crypto.randomUUID(),
-    };
-    const updatedServers = [...servers, server];
-    setServers(updatedServers);
-    localStorage.setItem('mcp-servers', JSON.stringify(updatedServers));
+    addServer(newServer);
     setIsModalOpen(false);
   };
 
   const handleDeleteServer = (id: string) => {
-    const updatedServers = servers.filter((server) => server.id !== id);
-    setServers(updatedServers);
-    localStorage.setItem('mcp-servers', JSON.stringify(updatedServers));
+    deleteServer(id);
   };
+
   const handleToggleActive = (id: string) => {
-    const updatedServers = servers.map((server) =>
-      server.id === id ? { ...server, isActive: !server.isActive } : server
-    );
-    setServers(updatedServers);
-    localStorage.setItem('mcp-servers', JSON.stringify(updatedServers));
+    toggleServerActive(id);
   };
 
   const handleEditHeaders = (server: IMcpServer) => {
@@ -72,9 +51,7 @@ export default function McpServerConfigClient() {
   };
 
   const handleSaveHeaders = (serverId: string, headers: IHeaderConfig[]) => {
-    const updatedServers = servers.map((server) => (server.id === serverId ? { ...server, headers } : server));
-    setServers(updatedServers);
-    localStorage.setItem('mcp-servers', JSON.stringify(updatedServers));
+    updateServerHeaders(serverId, headers);
     setIsHeadersModalOpen(false);
     setSelectedServer(null);
   };
@@ -110,25 +87,30 @@ export default function McpServerConfigClient() {
                   Add MCP Server
                 </Button>
               </div>
-              <AddMcpServerModal open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={handleAddServer} />
-              <McpServerTable
-                servers={servers}
-                onDelete={handleDeleteServer}
-                onToggleActive={handleToggleActive}
-                onEditHeaders={handleEditHeaders}
-              />
-              <EditHeadersModal
-                open={isHeadersModalOpen}
-                onOpenChange={setIsHeadersModalOpen}
-                server={selectedServer}
-                onSave={handleSaveHeaders}
-                tokens={tokens}
-                instances={instances}
-              />
+              {isLoading ? (
+                <div className="py-4 text-center">Loading servers...</div>
+              ) : (
+                <>
+                  <AddMcpServerModal open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={handleAddServer} />
+                  <McpServerTable
+                    servers={servers}
+                    onDelete={handleDeleteServer}
+                    onToggleActive={handleToggleActive}
+                    onEditHeaders={handleEditHeaders}
+                  />
+                  <EditHeadersModal
+                    open={isHeadersModalOpen}
+                    onOpenChange={setIsHeadersModalOpen}
+                    server={selectedServer}
+                    onSave={handleSaveHeaders}
+                    tokens={tokens}
+                    instances={instances}
+                  />
+                </>
+              )}
             </div>
           </div>
         </div>
-        <div className="container mx-auto py-10"></div>
       </SidebarInset>
     </SidebarProvider>
   );

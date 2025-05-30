@@ -6,7 +6,7 @@ interface SelectionModeProps {
   onSelectCustom: () => void;
 }
 
-export const SelectionMode: FC<SelectionModeProps> = ({ onSelectPreconfigured, onSelectCustom }) => (
+export const SelectionMcpType: FC<SelectionModeProps> = ({ onSelectPreconfigured, onSelectCustom }) => (
   <div className="grid grid-cols-2 gap-4 mt-4">
     <button
       onClick={onSelectPreconfigured}
