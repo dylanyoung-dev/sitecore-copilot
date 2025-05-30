@@ -33,7 +33,7 @@ const EditHeadersModal: FC<EditHeadersModalProps> = ({
     if (server && open) {
       // Try to populate values from tokens/instances
       const serverHeaders = server.headers || [];
-      const populatedHeaders = populateHeaderValues(serverHeaders, tokens, instances);
+      const populatedHeaders = populateHeaderValues(serverHeaders);
       setHeaders(populatedHeaders);
     } else {
       setHeaders([]);
@@ -112,9 +112,7 @@ const EditHeadersModal: FC<EditHeadersModalProps> = ({
                           className="text-sm"
                         />
                         {header.source?.type && header.source.type !== 'manual' && (
-                          <div className="text-xs text-blue-500 mt-1">
-                            Auto-populated from {header.source.type === 'token' ? 'API tokens' : 'instances'}
-                          </div>
+                          <div className="text-xs text-blue-500 mt-1">Auto-populated from an Instance</div>
                         )}
                       </div>
                       <div>

@@ -86,7 +86,7 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
       serverHeaders = [...server.headers];
 
       // Populate values from existing tokens and instances
-      serverHeaders = populateHeaderValues(serverHeaders, tokens, instances);
+      serverHeaders = populateHeaderValues(serverHeaders);
 
       // If headers require values, show the header config screen
       const missingRequiredHeaders = serverHeaders.some((h) => h.required && !h.value);
