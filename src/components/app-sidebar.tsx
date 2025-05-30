@@ -16,7 +16,7 @@ const data = {
   },
   teams: [
     {
-      name: 'Copilot',
+      name: 'My Copilot',
       logo: BrainCircuit,
     },
   ],
