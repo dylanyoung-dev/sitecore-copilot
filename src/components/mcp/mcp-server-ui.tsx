@@ -31,6 +31,7 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
     type: 'http',
     isActive: true,
     headers: [],
+    apiDefinitionId: '',
   });
   const [headers, setHeaders] = useState<IHeaderConfig[]>([]);
   const [newHeader, setNewHeader] = useState<IHeaderConfig>({ key: '', value: '', required: false });
@@ -38,6 +39,7 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
   const { instances } = useInstances();
   const { preconfiguredServers, isLoading } = useMcpServers();
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedServer, setSelectedServer] = useState<IYamlServerConfig | null>(null);
 
   useEffect(() => {
     if (preconfiguredServers.length > 0) {
@@ -60,7 +62,15 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       setMode('selection');
-      setForm({ name: '', url: '', security: 'open', type: 'http', isActive: true, headers: [] });
+      setForm({
+        name: '',
+        url: '',
+        security: 'open',
+        type: 'http',
+        isActive: true,
+        headers: [],
+        apiDefinitionId: '',
+      });
       setHeaders([]);
       setNewHeader({ key: '', value: '', required: false });
     }
@@ -89,8 +99,10 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
           security: server.security,
           isActive: true,
           headers: serverHeaders,
+          apiDefinitionId: server.apiDefinitionId || '',
         });
         setHeaders(serverHeaders);
+        setSelectedServer(server);
         setMode('headers');
         return;
       }
@@ -103,16 +115,18 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
       security: server.security as 'open' | 'oauth',
       isActive: true,
       headers: serverHeaders,
+      apiDefinitionId: server.apiDefinitionId || '',
     });
     handleOpenChange(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    if (!form) return;
     setForm({ ...form, [e.target.name]: e.target.value });
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.security === 'oauth') {
+    if (form?.security === 'oauth') {
       alert('OAuth is currently disabled and coming soon. Please use open security for now.');
       return;
     }
@@ -248,6 +262,13 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
               onSubmit(finalForm);
               handleOpenChange(false);
             }}
+            server={
+              {
+                ...selectedServer!,
+                id: 'temp-id', // Add required id
+                isActive: true, // Add required isActive
+              } as IMcpServer
+            }
           />
         );
     }

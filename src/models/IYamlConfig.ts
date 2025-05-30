@@ -1,9 +1,10 @@
-import { IHeaderConfig } from "./IHeaderConfig";
+import { IHeaderConfig } from './IHeaderConfig';
 
 export interface IYamlServerConfig {
   label: string;
   name: string;
   url: string;
+  apiDefinitionId: string;
   type: 'http' | 'sse';
   security: 'open' | 'oauth';
   disabled?: boolean;

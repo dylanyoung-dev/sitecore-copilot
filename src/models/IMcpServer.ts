@@ -4,6 +4,7 @@ export interface IMcpServer {
   id: string;
   name: string;
   url: string;
+  apiDefinitionId: string;
   security: 'open' | 'oauth';
   description?: string;
   isActive: boolean;

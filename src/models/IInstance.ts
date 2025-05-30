@@ -22,6 +22,7 @@ export interface IFieldDefinition {
 }
 
 export interface IApiDefinition {
+  id: string;
   name: string;
   label: string;
   fields: IFieldDefinition[];

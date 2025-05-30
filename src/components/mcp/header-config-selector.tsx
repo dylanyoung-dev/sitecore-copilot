@@ -6,6 +6,9 @@ import { IHeaderConfig } from '@/models/IHeaderConfig';
 import { IInstance } from '@/models/IInstance';
 import { AlertCircle, ChevronLeft, Info, Plus, X, KeyRound } from 'lucide-react';
 import { FC, useState } from 'react';
+import { getApiDefinitions } from '@/data/apiDefinitions';
+import { IMcpServer } from '@/models/IMcpServer';
+import { TokenInput } from '@/components/token-input';
 
 interface HeadersConfigProps {
   headers: IHeaderConfig[];
@@ -14,7 +17,15 @@ interface HeadersConfigProps {
   onSave: () => void;
   onCancel: () => void;
   instances: IInstance[];
+  server: IMcpServer;
 }
+
+const apiDefinitions = getApiDefinitions();
+
+const getFieldsForServer = (apiDefinitionId: string) => {
+  const def = apiDefinitions.find((d) => d.id === apiDefinitionId);
+  return def?.fields || [];
+};
 
 export const HeadersConfig: FC<HeadersConfigProps> = ({
   headers,
@@ -23,6 +34,7 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
   onSave,
   onCancel,
   instances,
+  server,
 }) => {
   const [newHeader, setNewHeader] = useState<IHeaderConfig>({
     key: '',
@@ -44,6 +56,7 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
       updatedHeaders[index] = { ...updatedHeaders[index], [field]: value };
     }
 
+    console.log('New headers state:', updatedHeaders);
     onHeadersChange(updatedHeaders);
   };
 
@@ -89,12 +102,9 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
                 <div className="flex-1 grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs text-gray-500 block mb-2">Key</label>
-                    <Input
-                      value={header.key}
-                      onChange={(e) => handleHeaderChange(index, 'key', e.target.value)}
-                      disabled={header.source?.type !== 'manual'}
-                      className="text-sm"
-                    />
+                    <div className="h-10 px-3 py-2 text-sm rounded-md border border-input bg-background text-muted-foreground">
+                      {header.key}
+                    </div>
                   </div>
                   <div>
                     <div className="flex justify-between mb-2">
@@ -104,13 +114,15 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
                       )}
                     </div>
                     <div className="relative flex">
-                      {header.source?.type === 'instance' && header.source.id ? (
+                      {header.source?.type === 'apiDefinition' && header.source.fieldId ? (
                         <div className="relative w-full">
                           <div className="flex items-center h-10 px-3 py-2 text-sm rounded-md border border-input bg-background text-muted-foreground">
                             <div className="flex-1 overflow-hidden">
                               <div className="inline-flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-xs">
                                 <KeyRound className="h-3 w-3 mr-1" />
-                                {instances.find((i) => i.id === header.source!.id)?.name || 'Unknown'}
+                                {getFieldsForServer(server.apiDefinitionId).find(
+                                  (f) => f.name === header.source?.fieldId
+                                )?.label || header.source.fieldId}
                               </div>
                             </div>
                             <Button
@@ -121,18 +133,20 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
                                 handleHeaderChange(index, 'source', { type: 'manual' });
                                 handleHeaderChange(index, 'value', '');
                               }}
-                              className="cursor-point ml-1 h-5 w-5 p-0 rounded-full"
+                              className="cursor-pointer ml-1 h-5 w-5 p-0 rounded-full"
                             >
                               <X className="h-3 w-3" />
                             </Button>
                           </div>
                         </div>
                       ) : (
-                        <Input
+                        <TokenInput
                           value={header.value}
-                          onChange={(e) => {
-                            handleHeaderChange(index, 'value', e.target.value);
-                            handleHeaderChange(index, 'source', { type: 'manual' });
+                          onChange={(value) => {
+                            handleHeaderChange(index, 'value', value);
+                            if (!value) {
+                              handleHeaderChange(index, 'source', { type: 'manual' });
+                            }
                           }}
                           className={`text-sm pr-10 ${
                             header.required && !header.value ? 'border-red-300 bg-red-50' : ''
@@ -157,34 +171,41 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
                           </Tooltip>
                         </TooltipProvider>
                         <PopoverContent className="p-2 w-56">
-                          <div className="text-xs text-gray-500 mb-2">Insert token from instance:</div>
-                          {instances.length === 0 ? (
-                            <div className="text-sm text-gray-400">No instances available</div>
+                          <div className="text-xs text-gray-500 mb-2">Insert fields from Instance Definitions:</div>
+                          {!server.apiDefinitionId ? (
+                            <div className="text-sm text-gray-400">No available definitions</div>
                           ) : (
                             <ul>
-                              {instances.map((inst) => (
-                                <li key={inst.id}>
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full justify-start"
-                                    onClick={() => {
-                                      // Update source first
-                                      handleHeaderChange(index, 'source', { type: 'instance', id: inst.id });
+                              <li>
+                                <div className="mb-1 font-medium">Field Selection</div>
+                                <ul>
+                                  {getFieldsForServer(server.apiDefinitionId).map((field) => (
+                                    <li key={field.name}>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-start cursor-pointer gap-2"
+                                        onClick={() => {
+                                          // Update the source to reference the API definition field
+                                          handleHeaderChange(index, 'source', {
+                                            type: 'apiDefinition',
+                                            fieldId: field.name,
+                                          });
 
-                                      // Set the header value to use instance ID as the actual value
-                                      // This will be used when constructing headers for API calls
-                                      handleHeaderChange(index, 'value', inst.fields?.token || inst.id);
+                                          // Set a placeholder value or generate a template value
+                                          // This will be replaced at runtime with the actual field value
+                                          handleHeaderChange(index, 'value', `{${field.label}}`);
 
-                                      // Close the popover
-                                      setOpen({ ...open, [index]: false });
-                                    }}
-                                  >
-                                    {inst.name}
-                                  </Button>
-                                </li>
-                              ))}
+                                          setOpen({ ...open, [index]: false });
+                                        }}
+                                      >
+                                        {field.label}
+                                      </Button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </li>
                             </ul>
                           )}
                         </PopoverContent>

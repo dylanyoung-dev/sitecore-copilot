@@ -10,6 +10,7 @@ export const getApiDefinitions = (): IApiDefinition[] => {
 
   return [
     {
+      id: 'sitecoreApiDef1',
       name: 'personalize',
       label: 'Sitecore Experience (CDP/P)',
       fields: [
@@ -48,6 +49,7 @@ export const getApiDefinitions = (): IApiDefinition[] => {
       product: ProductTypes.Experience,
     },
     {
+      id: 'sitecoreApiDef2',
       name: 'xmc-admin',
       label: 'Authoring/Management APIs',
       fields: [
@@ -68,6 +70,7 @@ export const getApiDefinitions = (): IApiDefinition[] => {
       product: ProductTypes.XMC,
     },
     {
+      id: 'sitecoreApiDef3',
       name: 'xmc-edge',
       label: 'Edge/Content Delivery',
       fields: [
