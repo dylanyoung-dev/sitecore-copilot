@@ -16,21 +16,18 @@ servers:
       - key: 'x-sitecore-client-id'
         required: true
         source:
-          type: 'instance'
-          instanceFilter: 'product=personalize'
-          field: 'tenantId'
+          type: 'apiDefinition'
+          fieldId: 'clientId'
       - key: 'x-sitecore-client-secret'
         required: true
         source:
-          type: 'instance'
-          instanceFilter: 'product=personalize'
-          field: 'tenantId'
+          type: 'apiDefinition'
+          fieldId: 'clientSecret'
       - key: 'x-sitecore-region'
         required: true
         source:
-          type: 'instance'
-          instanceFilter: 'product=personalize'
-          field: 'tenantId'
+          type: 'apiDefinition'
+          fieldId: 'region'
 
   - label: 'Sitecore XMC Apps (Unofficial)'
     name: 'XMC Apps'

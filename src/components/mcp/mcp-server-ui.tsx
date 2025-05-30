@@ -137,29 +137,12 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
       headers: headers.length > 0 ? headers : form.headers,
     };
 
-    onSubmit(finalForm);
+    console.log('Submitting MCP Server:', finalForm);
+
+    //onSubmit(finalForm);
     handleOpenChange(false);
   };
 
-  // Header management
-  const handleAddHeader = () => {
-    if (newHeader.key && newHeader.value) {
-      setHeaders([...headers, newHeader]);
-      setNewHeader({ key: '', value: '', required: false });
-    }
-  };
-
-  const handleRemoveHeader = (index: number) => {
-    const updatedHeaders = [...headers];
-    updatedHeaders.splice(index, 1);
-    setHeaders(updatedHeaders);
-  };
-
-  const handleHeaderChange = (index: number, field: keyof IHeaderConfig, value: string | boolean) => {
-    const updatedHeaders = [...headers];
-    updatedHeaders[index] = { ...updatedHeaders[index], [field]: value };
-    setHeaders(updatedHeaders);
-  };
   const renderContent = () => {
     switch (mode) {
       case 'selection':
@@ -259,6 +242,7 @@ const AddMcpServerModal: FC<AddMcpServerModalProps> = ({ open, onOpenChange, onS
                 ...form,
                 headers: headers,
               };
+
               onSubmit(finalForm);
               handleOpenChange(false);
             }}

@@ -1,24 +1,54 @@
 import { IHeaderConfig } from '@/models/IHeaderConfig';
+import { IInstance } from '@/models/IInstance';
+import { experimental_createMCPClient } from 'ai';
+import {
+  StreamableHTTPClientTransport,
+  StreamableHTTPClientTransportOptions,
+} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 
 /**
  * Convert header configurations to a headers record
- * @param headers Array of header configurations
+ * @param headerConfigs Array of header configurations
+ * @param instances Array of instances to match against
  * @returns Record of header key-value pairs
  */
-export function headersToRecord(headers: IHeaderConfig[] = []): Record<string, string> {
-  const result: Record<string, string> = {};
+export function headersToRecord(headerConfigs: any[] = [], instances: IInstance[] = []): Record<string, string> {
+  const headers: Record<string, string> = {};
 
-  if (!headers || headers.length === 0) {
-    return result;
+  if (!headerConfigs || !Array.isArray(headerConfigs)) return headers;
+
+  // Process each header configuration
+  for (const config of headerConfigs) {
+    if (config.source?.type === 'apiDefinition' && config.source.fieldId) {
+      // Find matching instance with the same apiDefinitionId as the header's parent server
+      const matchingInstance = instances.find(
+        (instance) => instance.apiDefinitionId === config.server?.apiDefinitionId && instance.isActive
+      );
+
+      if (matchingInstance && matchingInstance.fields) {
+        // Look up the field value from the matching instance
+        const fieldValue = matchingInstance.fields[config.source.fieldId];
+        if (fieldValue) {
+          // Check if fieldValue is an object with a value property or a string
+          headers[config.key] =
+            typeof fieldValue === 'object' && fieldValue.value !== undefined
+              ? String(fieldValue.value)
+              : String(fieldValue);
+          continue;
+        }
+      }
+
+      // If we couldn't find a value, set empty string for required headers
+      if (config.required) {
+        headers[config.key] = '';
+      }
+    } else if (config.value) {
+      // For manual values, just use the value directly
+      headers[config.key] = config.value;
+    }
   }
 
-  headers.forEach((header) => {
-    if (header.key && header.value) {
-      result[header.key] = header.value;
-    }
-  });
-
-  return result;
+  return headers;
 }
 
 /**
@@ -58,14 +88,26 @@ export function createMcpClientConfig(
         ...(hasHeaders && { fetchOptions: { headers } }),
       },
     };
-  }
+  } else {
+    try {
+      // Use the StreamableHTTPClientTransport with correct options structure
+      const urlObject = new URL(url);
+      // Pass headers directly instead of using fetchOptions
+      const transportOptions: StreamableHTTPClientTransportOptions =
+        Object.keys(headers).length > 0
+          ? {
+              requestInit: {
+                method: 'POST',
+                headers: { ...headers, 'Content-Type': 'application/json', Accept: 'application/json' },
+              },
+            }
+          : {};
 
-  // For HTTP transport type
-  return {
-    transport: {
-      type: 'http',
-      url,
-      ...(hasHeaders && { fetchOptions: { headers } }),
-    },
-  };
+      const transport = new StreamableHTTPClientTransport(urlObject, transportOptions);
+
+      return { transport };
+    } catch (error) {
+      console.error(`Failed to initialize HTTP client for ${url}:`, error);
+    }
+  }
 }

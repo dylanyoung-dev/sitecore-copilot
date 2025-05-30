@@ -45,16 +45,16 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
   // Add state to control popover visibility
   const [open, setOpen] = useState<Record<number, boolean>>({});
 
-  const handleHeaderChange = (index: number, field: keyof IHeaderConfig, value: any) => {
-    console.log(`Updating header at index ${index}, field: ${field}, value:`, value);
+  // Updated function to handle multiple fields at once
+  const handleHeaderChange = (index: number, updates: Partial<IHeaderConfig>) => {
+    console.log(`Updating header at index ${index} with:`, updates);
     const updatedHeaders = [...headers];
 
-    // Handle nested properties properly
-    if (field === 'source') {
-      updatedHeaders[index] = { ...updatedHeaders[index], source: value };
-    } else {
-      updatedHeaders[index] = { ...updatedHeaders[index], [field]: value };
-    }
+    // Update the header with all provided changes at once
+    updatedHeaders[index] = {
+      ...updatedHeaders[index],
+      ...updates,
+    };
 
     console.log('New headers state:', updatedHeaders);
     onHeadersChange(updatedHeaders);
@@ -85,7 +85,9 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
         <div className="text-sm">
           <p className="font-medium text-blue-800">Required Headers</p>
           <p className="text-blue-700">
-            This server requires additional headers. Some values may be auto-filled from your existing configurations.
+            This server requires additional headers. Values will automatically populate from active Instances if
+            applicable. If an active instance is required and not provided this MCP Server will be unavailable during
+            the chat.
           </p>
         </div>
       </div>
@@ -120,33 +122,34 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
                             <div className="flex-1 overflow-hidden">
                               <div className="inline-flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-xs">
                                 <KeyRound className="h-3 w-3 mr-1" />
-                                {getFieldsForServer(server.apiDefinitionId).find(
-                                  (f) => f.name === header.source?.fieldId
-                                )?.label || header.source.fieldId}
+                                <span>
+                                  {getFieldsForServer(server.apiDefinitionId).find(
+                                    (f) => f.name === header.source?.fieldId
+                                  )?.label || header.source.fieldId}
+                                </span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    // First update the source type to manual
+                                    handleHeaderChange(index, { source: { type: 'manual' }, value: '' });
+                                    // Force rerender by logging
+                                    console.log('Clearing field and switching to manual mode');
+                                  }}
+                                  className="h-4 w-4 p-0 ml-1 hover:bg-blue-200 rounded-full cursor-pointer"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
                               </div>
                             </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                handleHeaderChange(index, 'source', { type: 'manual' });
-                                handleHeaderChange(index, 'value', '');
-                              }}
-                              className="cursor-pointer ml-1 h-5 w-5 p-0 rounded-full"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
                           </div>
                         </div>
                       ) : (
                         <TokenInput
                           value={header.value}
                           onChange={(value) => {
-                            handleHeaderChange(index, 'value', value);
-                            if (!value) {
-                              handleHeaderChange(index, 'source', { type: 'manual' });
-                            }
+                            handleHeaderChange(index, { value, source: value ? header.source : { type: 'manual' } });
                           }}
                           className={`text-sm pr-10 ${
                             header.required && !header.value ? 'border-red-300 bg-red-50' : ''
@@ -188,15 +191,13 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
                                         className="w-full justify-start cursor-pointer gap-2"
                                         onClick={() => {
                                           // Update the source to reference the API definition field
-                                          handleHeaderChange(index, 'source', {
-                                            type: 'apiDefinition',
-                                            fieldId: field.name,
+                                          handleHeaderChange(index, {
+                                            source: {
+                                              type: 'apiDefinition',
+                                              fieldId: field.name,
+                                            },
+                                            value: `${field.label}`,
                                           });
-
-                                          // Set a placeholder value or generate a template value
-                                          // This will be replaced at runtime with the actual field value
-                                          handleHeaderChange(index, 'value', `{${field.label}}`);
-
                                           setOpen({ ...open, [index]: false });
                                         }}
                                       >
@@ -269,10 +270,17 @@ export const HeadersConfig: FC<HeadersConfigProps> = ({
       )}
 
       <div className="pt-4 flex justify-end space-x-3">
-        <Button variant="outline" onClick={onCancel}>
+        <Button variant="outline" className="cursor-pointer" onClick={onCancel}>
           Cancel
         </Button>
-        <Button onClick={onSave}>Save and Add Server</Button>
+        <Button
+          className="cursor-pointer"
+          onClick={() => {
+            onSave();
+          }}
+        >
+          Save and Add Server
+        </Button>
       </div>
     </div>
   );

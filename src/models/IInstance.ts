@@ -7,6 +7,7 @@ export interface IInstance {
   fields: Record<string, { definition: IFieldDefinition; value: any }>;
   isActive: boolean;
   product: ProductTypes;
+  apiDefinitionId?: string;
 }
 
 export interface IFieldDefinition {

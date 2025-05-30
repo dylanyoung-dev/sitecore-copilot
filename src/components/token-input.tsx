@@ -21,15 +21,16 @@ export const TokenInput: FC<{
       <div
         className={`flex items-center h-10 px-3 py-2 text-sm rounded-md border border-input bg-background w-full ${className}`}
       >
-        <div className="flex-1">
+        <div className="inline-flex items-center bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-xs">
+          <KeyRound className="h-3 w-3 mr-1" />
+          <span>{isToken[1]}</span>
           <button
             type="button"
             onClick={handleResetClick}
-            className="inline-flex items-center bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-full px-3 py-1 text-xs transition-colors cursor-pointer"
+            className="ml-1 p-0.5 hover:bg-blue-200 rounded-full transition-colors"
+            aria-label="Clear value"
           >
-            <KeyRound className="h-3 w-3 mr-1" />
-            {isToken[1]}
-            <X className="h-3 w-3 ml-1" />
+            <X className="h-3 w-3" />
           </button>
         </div>
       </div>

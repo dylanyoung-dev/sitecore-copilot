@@ -2,7 +2,7 @@ import { IInstance } from '@/models/IInstance';
 import { IMcpServer } from '@/models/IMcpServer';
 import { enumTokenProviders, IToken } from '@/models/IToken';
 import { getModelProvider } from '@/models/enumModels';
-import { headersToRecord } from '@/utils/mcpUtils';
+import { createMcpClientConfig, headersToRecord } from '@/utils/mcpUtils';
 import { createOpenAI } from '@ai-sdk/openai';
 import { experimental_createMCPClient, streamText } from 'ai';
 import { createAnthropic } from '@ai-sdk/anthropic';
@@ -29,43 +29,12 @@ async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] =
 
   for (const server of activeServers) {
     try {
-      let client;
-
       // Convert header configs to a simple header object
-      const headers = headersToRecord(server.headers);
+      const headers = headersToRecord(server.headers, instances);
 
-      // Create client based on transport type
-      if (server.type === 'sse') {
-        // For SSE transports
-        const options: any = {
-          transport: {
-            type: 'sse',
-            url: server.url,
-            headers: headers,
-          },
-        };
+      const mcpConfiguration = createMcpClientConfig(server.url, headers, server.type);
 
-        console.log('options: ', JSON.stringify(options, null, 2));
-
-        client = await experimental_createMCPClient(options);
-      } else if (server.type === 'http') {
-        try {
-          // Use the StreamableHTTPClientTransport with correct options structure
-          const options: any = {
-            transport: {
-              type: 'http',
-              url: server.url,
-              headers,
-            },
-          };
-
-          console.log('options: ', JSON.stringify(options, null, 2));
-
-          client = await experimental_createMCPClient(options);
-        } catch (error) {
-          console.error(`Failed to initialize HTTP client for ${server.name}:`, error);
-        }
-      }
+      const client = await experimental_createMCPClient(mcpConfiguration);
 
       if (client) {
         clients.push({ client, server });
