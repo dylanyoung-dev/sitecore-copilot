@@ -25,21 +25,20 @@ export const PreconfiguredServerSelector: FC<Props> = ({
   const filteredServers = preconfiguredServers.filter((s) => (s.category || 'Other') === selectedCategory);
 
   return (
-    <div className="flex gap-6 h-[calc(100vh-14rem)]">
+    <div className="flex gap-6 h-[calc(100vh-32rem)]">
       {/* Category Selector */}
       <div className="w-40 overflow-y-auto">
         <div className="font-semibold mb-2 sticky top-0 bg-background py-1">Categories</div>
         <ul className="space-y-1">
           {categories.map((cat) => (
             <li key={cat}>
-              <button
-                className={`w-full text-left px-3 py-2 rounded ${
-                  selectedCategory === cat ? 'bg-blue-100 font-bold' : 'hover:bg-gray-100'
-                }`}
+              <Button
+                className={`w-full justify-start text-sm py-1.5 h-auto cursor-pointer`}
+                variant={selectedCategory === cat ? 'secondary' : 'ghost'}
                 onClick={() => setSelectedCategory(cat)}
               >
                 {cat}
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
