@@ -25,7 +25,7 @@ async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] =
   // Use Record<string, any> to properly type the dynamic keys
   const toolSets: Record<string, any> = {};
 
-  console.log('activeServers: ', JSON.stringify(activeServers, null, 2));
+  console.log('mcpServers: ', JSON.stringify(mcpServers, null, 2));
 
   for (const server of activeServers) {
     try {

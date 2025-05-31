@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { McpToolsDrawer } from './mcp/tools-ui';
 import { ChatMessages } from './ui/chat-messages';
 import { ModelSelector } from './ui/model-selector';
+import { useMcpServers } from '@/hooks/use-mcp-servers';
 
 interface CopilotChatProps {
   instances: IInstance[];
@@ -23,7 +24,7 @@ interface CopilotChatProps {
 export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) => {
   const [selectedInstance, setSelectedInstance] = useState<IInstance | undefined>(instances[0]);
   const [selectedModel, setSelectedModel] = useState<string>('gpt-4o-mini');
-  const [mcpServers, setMcpServers] = useState<IMcpServer[]>([]);
+  const { getActiveServers } = useMcpServers();
   const [sessionEnabledServers, setSessionEnabledServers] = useState<Record<string, boolean>>({});
 
   // Find the appropriate token for the selected model
@@ -39,7 +40,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
       tokenData: getTokenForModel(),
       allTokens: tokens,
       model: selectedModel,
-      mcpServers: mcpServers.filter((server) => server.isActive && (sessionEnabledServers[server.id] ?? false)),
+      mcpServers: getActiveServers().filter((server) => sessionEnabledServers[server.id] === true),
     },
   });
 
