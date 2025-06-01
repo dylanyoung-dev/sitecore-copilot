@@ -45,9 +45,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, isLoading 
                         const match = /language-(\w+)/.exec(props.className || '');
                         return !(props as any).inline ? (
                           <div className="relative">
-                            <pre className="my-4 p-4 bg-muted-foreground/10 rounded-lg overflow-x-auto">
+                            <pre className="my-4 p-4 bg-muted-foreground/10 rounded-lg overflow-x-auto max-w-full">
                               <code
-                                className={cn('font-mono text-sm', match?.[1] && `language-${match[1]}`)}
+                                className={cn('font-mono text-sm break-words', match?.[1] && `language-${match[1]}`)}
                                 {...props}
                               >
                                 {String(props.children).replace(/\n$/, '')}

@@ -69,7 +69,7 @@ export const McpToolsDrawer: React.FC<McpToolsDrawerProps> = ({
   return (
     <Sheet>
       <SheetTrigger asChild>{triggerElement}</SheetTrigger>
-      <SheetContent side="right" className="w-[350px] sm:w-[450px] p-0">
+      <SheetContent side="right" className="w-[350px] sm:w-[450px] p-0 !z-[999]">
         <SheetHeader className="p-4 border-b">
           <SheetTitle>Available Tools</SheetTitle>
           <SheetDescription>Enable or disable tools for this session</SheetDescription>

@@ -19,7 +19,7 @@ interface ChatRequest {
   mcpServers?: IMcpServer[];
 }
 
-async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] = [], instances: IInstance[] = []) {
+async function initializeMcpClients(mcpServers: IMcpServer[], instances: IInstance[] = []) {
   const activeServers = mcpServers.filter((server) => server.isActive);
   const clients: Array<{ client: any; server: IMcpServer }> = [];
   // Use Record<string, any> to properly type the dynamic keys
@@ -40,23 +40,26 @@ async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] =
         clients.push({ client, server });
         const tools = await client.tools();
 
-        //console.log(`Initialized MCP client for ${server.name} with tools:`, Object.keys(tools));
+        // //console.log(`Initialized MCP client for ${server.name} with tools:`, Object.keys(tools));
 
-        // Add server name as prefix to avoid tool name conflicts
-        // Use Record<string, any> for the prefixed tools
-        const prefixedTools: Record<string, any> = {};
-        Object.entries(tools).forEach(([key, value]) => {
-          prefixedTools[`${server.name}_${key}`] = value;
-        });
+        // // Add server name as prefix to avoid tool name conflicts
+        // // Use Record<string, any> for the prefixed tools
+        // const prefixedTools: Record<string, any> = {};
+        // Object.entries(tools).forEach(([key, value]) => {
+        //   prefixedTools[`${server.name}_${key}`] = value;
+        // });
 
-        Object.assign(toolSets, prefixedTools);
+        // Object.assign(toolSets, prefixedTools);
+        Object.assign(toolSets, tools);
       }
     } catch (error) {
       //console.error(`Failed to initialize MCP client for ${server.name}:`, error);
     }
   }
 
-  return { clients, tools: toolSets };
+  console.log('Initialized MCP Clients:', JSON.stringify(toolSets, null, 2));
+
+  return { clients, toolSets };
 }
 
 export async function POST(req: Request) {
@@ -92,10 +95,10 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { clients, tools: mcpTools } = await initializeMcpClients(updatedMcpServers, allTokens, instances);
+    const { toolSets } = await initializeMcpClients(updatedMcpServers, instances);
 
-    console.log('Inialized MCP Clients: ', JSON.stringify(clients, null, 2));
-    console.log('Tools: ', JSON.stringify(mcpTools, null, 2));
+    //console.log('Inialized MCP Clients: ', JSON.stringify(clients, null, 2));
+    console.log('Tools: ', JSON.stringify(toolSets, null, 2));
 
     // Create appropriate AI client based on token provider
     let aiClient;
@@ -118,17 +121,13 @@ export async function POST(req: Request) {
         });
     }
 
-    const tools: Record<string, any> = {
-      ...mcpTools,
-    };
-
     const systemPrompt = {
       role: 'system',
-      content: `You are a Sitecore Expert assistant. 
+      content: `You are a Copilot assistant. 
 
     Instructions
-    - Always ask to confirm before running any functions
-    - Tool is for Marketers, so avoid showing how to do the request programmatically
+
+
     
     Format your responses using markdown:
     - Use **bold** for important concepts
@@ -138,15 +137,40 @@ export async function POST(req: Request) {
     
     Respond concisely and focus on practical solutions.`,
     };
-    const result = streamText({
-      model: aiClient(model),
-      messages: [systemPrompt, ...messages],
-      tools,
-      maxSteps: 3,
-    });
 
-    return result.toDataStreamResponse();
+    try {
+      const result = streamText({
+        model: aiClient(model),
+        messages: [systemPrompt, ...messages],
+        tools: toolSets,
+        maxSteps: 3,
+      });
+
+      return result.toDataStreamResponse();
+    } catch (toolError) {
+      console.error('Tool execution error:', toolError);
+      return new Response(
+        JSON.stringify({
+          error: 'Tool execution failed',
+          details: (toolError as any)?.message || 'Unknown error',
+        }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
   } catch (error) {
-    //return new Response('Internal Server Error', { status: 500 });
+    console.error('API error:', error);
+    return new Response(
+      JSON.stringify({
+        error: 'Internal Server Error',
+        details: (error as any)?.message || 'Unknown error',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 }
