@@ -25,12 +25,12 @@ async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] =
   // Use Record<string, any> to properly type the dynamic keys
   const toolSets: Record<string, any> = {};
 
-  console.log('mcpServers: ', JSON.stringify(mcpServers, null, 2));
-
   for (const server of activeServers) {
     try {
       // Convert header configs to a simple header object
-      const headers = headersToRecord(server.headers, instances);
+      const headers = headersToRecord(server, instances);
+
+      console.log(`Creating MCP client for server: ${server.name} with headers:`, headers);
 
       const mcpConfiguration = createMcpClientConfig(server.url, headers, server.type);
 
@@ -40,7 +40,7 @@ async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] =
         clients.push({ client, server });
         const tools = await client.tools();
 
-        console.log(`Initialized MCP client for ${server.name} with tools:`, Object.keys(tools));
+        //console.log(`Initialized MCP client for ${server.name} with tools:`, Object.keys(tools));
 
         // Add server name as prefix to avoid tool name conflicts
         // Use Record<string, any> for the prefixed tools
@@ -52,7 +52,7 @@ async function initializeMcpClients(mcpServers: IMcpServer[], tokens: IToken[] =
         Object.assign(toolSets, prefixedTools);
       }
     } catch (error) {
-      console.error(`Failed to initialize MCP client for ${server.name}:`, error);
+      //console.error(`Failed to initialize MCP client for ${server.name}:`, error);
     }
   }
 
@@ -91,21 +91,11 @@ export async function POST(req: Request) {
     }
   }
 
-  console.log('Chat request:', {
-    messages,
-    instances,
-    tokenData: {
-      name: tokenToUse.name,
-      provider: tokenToUse.provider,
-      active: tokenToUse.active,
-    },
-    model,
-    mcpServers,
-  });
   try {
-    // Initialize MCP clients with all available context
-    console.log('mcpTools: ', mcpServers);
     const { clients, tools: mcpTools } = await initializeMcpClients(updatedMcpServers, allTokens, instances);
+
+    console.log('Inialized MCP Clients: ', JSON.stringify(clients, null, 2));
+    console.log('Tools: ', JSON.stringify(mcpTools, null, 2));
 
     // Create appropriate AI client based on token provider
     let aiClient;
@@ -157,6 +147,6 @@ export async function POST(req: Request) {
 
     return result.toDataStreamResponse();
   } catch (error) {
-    return new Response('Internal Server Error', { status: 500 });
+    //return new Response('Internal Server Error', { status: 500 });
   }
 }

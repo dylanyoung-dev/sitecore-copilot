@@ -5,6 +5,7 @@ import {
   StreamableHTTPClientTransport,
   StreamableHTTPClientTransportOptions,
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { IMcpServer } from '@/models/IMcpServer';
 
 /**
  * Convert header configurations to a headers record
@@ -12,17 +13,17 @@ import {
  * @param instances Array of instances to match against
  * @returns Record of header key-value pairs
  */
-export function headersToRecord(headerConfigs: any[] = [], instances: IInstance[] = []): Record<string, string> {
+export function headersToRecord(server: IMcpServer, instances: IInstance[] = []): Record<string, string> {
   const headers: Record<string, string> = {};
 
-  if (!headerConfigs || !Array.isArray(headerConfigs)) return headers;
+  if (!server?.headers || !Array.isArray(server.headers)) return headers;
 
   // Process each header configuration
-  for (const config of headerConfigs) {
+  for (const config of server.headers) {
     if (config.source?.type === 'apiDefinition' && config.source.fieldId) {
-      // Find matching instance with the same apiDefinitionId as the header's parent server
+      // Find matching instance with the same apiDefinitionId as the server
       const matchingInstance = instances.find(
-        (instance) => instance.apiDefinitionId === config.server?.apiDefinitionId && instance.isActive
+        (instance) => instance.apiDefinitionId === server.apiDefinitionId && instance.isActive
       );
 
       if (matchingInstance && matchingInstance.fields) {
@@ -85,7 +86,7 @@ export function createMcpClientConfig(
         url,
         // Some MCP servers may not support headers in SSE
         // So we only add them if they exist
-        ...(hasHeaders && { fetchOptions: { headers } }),
+        headers,
       },
     };
   } else {
