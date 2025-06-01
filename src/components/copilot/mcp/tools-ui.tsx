@@ -178,7 +178,7 @@ export const McpToolsDrawer: React.FC<McpToolsDrawerProps> = ({
             type="button"
             variant="outline"
             size="sm"
-            className="text-xs w-full"
+            className="text-xs w-full cursor-pointer"
             onClick={() => (window.location.href = '/settings/mcp')}
           >
             Configure MCP Servers

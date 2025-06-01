@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { IYamlServerConfig } from '@/models/IYamlConfig';
 import { ChevronLeft, Loader2 } from 'lucide-react';
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
 
 interface Props {
   preconfiguredServers: IYamlServerConfig[];
@@ -21,8 +21,19 @@ export const PreconfiguredServerSelector: FC<Props> = ({
   onBack,
   onSelect,
 }) => {
-  const categories = Array.from(new Set(preconfiguredServers.map((s) => s.category || 'Other')));
-  const filteredServers = preconfiguredServers.filter((s) => (s.category || 'Other') === selectedCategory);
+  const categories = useMemo(() => {
+    return Array.from(new Set(preconfiguredServers.map((s) => s.category || 'Other'))).sort((a, b) => {
+      // Keep "Other" category at the end if it exists
+      if (a === 'Other') return 1;
+      if (b === 'Other') return -1;
+      // Otherwise sort alphabetically
+      return a.localeCompare(b);
+    });
+  }, [preconfiguredServers]);
+
+  const filteredServers = useMemo(() => {
+    return preconfiguredServers.filter((s) => (s.category || 'Other') === selectedCategory);
+  }, [preconfiguredServers, selectedCategory]);
 
   return (
     <div className="flex gap-6 h-[calc(100vh-32rem)]">

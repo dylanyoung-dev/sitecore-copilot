@@ -47,6 +47,8 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
   const [showTools, setShowTools] = useState(false);
   const [availableTools, setAvailableTools] = useState<string[]>([]);
 
+  const PREDEFINED_ASSISTANT_MESSAGE = 'Welcome! I am your personal copilot assistant. How can I help you today?';
+
   // Handle tool selection
   const handleToolSelect = (tool: string) => {
     const prompt = `I'd like to use the ${tool} tool. Can you help me with that?`;
@@ -87,8 +89,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
         {
           id: 'welcome',
           role: 'assistant',
-          content:
-            'Welcome! I am your Sitecore DXP specialist. How can I help you with your Sitecore operations today?',
+          content: PREDEFINED_ASSISTANT_MESSAGE,
         },
       ]);
     }
@@ -99,14 +100,14 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
       {
         id: 'welcome',
         role: 'assistant',
-        content: 'Welcome! I am your Sitecore DXP specialist. How can I help you with your Sitecore operations today?',
+        content: PREDEFINED_ASSISTANT_MESSAGE,
       },
     ]);
   };
 
   // Preset message options
   const presetMessages = [
-    { label: 'Get Content', value: 'How do I export content?' },
+    { label: 'Get Content', value: 'Use <Tool> to do <x>' },
     { label: 'Generate a CSV', value: 'Now that I have my data can you convert it to CSV format?' },
     {
       label: 'Profile the Content',
@@ -143,7 +144,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="text-xs h-8"
+                  className="text-xs h-8 cursor-pointer"
                   onClick={() => handleInputChange({ target: { value: preset.value } } as any)}
                 >
                   {preset.label}
@@ -159,34 +160,42 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
                 onKeyDown={handleKeyDown}
                 value={input}
                 onChange={handleInputChange}
-                placeholder="Ask about content operations..."
-                className="pr-20 min-h-[80px] max-h-[200px] resize-none"
+                placeholder="Ask 'My Copilot' anything..."
+                className="min-h-[90px] max-h-[200px] resize-none px-3 py-2"
                 disabled={isLoading}
               />
+
+              {/* MCP Tools Drawer - positioned over textarea */}
+              <div className="absolute left-2 bottom-2 z-10">
+                <McpToolsDrawer
+                  sessionEnabledServers={sessionEnabledServers}
+                  setSessionEnabledServers={setSessionEnabledServers}
+                  handleToolSelect={handleToolSelect}
+                  instances={instances}
+                  triggerElement={
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      className="h-8 w-8 shadow-sm hover:bg-primary/10 cursor-pointer"
+                      aria-label="Show available tools"
+                    >
+                      <Wrench className="h-4 w-4" />
+                    </Button>
+                  }
+                />
+              </div>
+
+              {/* Send button stays on right side */}
               <TooltipProvider>
-                <div className="absolute right-2 bottom-2 flex gap-1">
-                  <McpToolsDrawer
-                    sessionEnabledServers={sessionEnabledServers}
-                    setSessionEnabledServers={setSessionEnabledServers}
-                    handleToolSelect={handleToolSelect}
-                    instances={instances}
-                    triggerElement={
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="h-8 w-8 p-0 cursor-pointer"
-                        aria-label="Show available tools"
-                      >
-                        <Wrench className="h-4 w-4" />
-                      </Button>
-                    }
-                  />
+                <div className="absolute right-2 bottom-2 z-10">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
                         type="submit"
-                        size="sm"
-                        className="h-8 w-8 p-0 cursor-pointer"
+                        size="icon"
+                        variant="outline"
+                        className="h-8 w-8 shadow-sm bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
                         disabled={isLoading || !input.trim()}
                       >
                         <Send className="h-4 w-4" />
@@ -204,7 +213,13 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({ instances, tokens }) =
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button type="button" variant="ghost" size="sm" onClick={handleClearChat}>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="cursor-pointer"
+                        onClick={handleClearChat}
+                      >
                         <RefreshCw className="h-4 w-4 mr-1" />
                         Clear chat
                       </Button>

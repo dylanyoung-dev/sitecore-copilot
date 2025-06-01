@@ -134,3 +134,28 @@ p[data-slot='dialog-description'] {
     color: #3498db;
   }
 }
+
+button,
+select,
+option,
+[role='button'],
+.btn,
+.button,
+.switch,
+[type='checkbox'],
+[type='radio'] {
+  cursor: pointer;
+}
+
+/* For disabled elements */
+button:disabled,
+select:disabled,
+option:disabled,
+[role='button'][aria-disabled='true'],
+.btn:disabled,
+.button:disabled,
+.switch:disabled,
+[type='checkbox']:disabled,
+[type='radio']:disabled {
+  cursor: not-allowed;
+}
