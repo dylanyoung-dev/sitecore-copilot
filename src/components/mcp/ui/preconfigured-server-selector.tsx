@@ -36,7 +36,7 @@ export const PreconfiguredServerSelector: FC<Props> = ({
   }, [preconfiguredServers, selectedCategory]);
 
   return (
-    <div className="flex gap-6 h-[calc(100vh-32rem)]">
+    <div className="flex gap-6 h-[calc(100vh-24rem)]">
       {/* Category Selector */}
       <div className="w-40 overflow-y-auto">
         <div className="font-semibold mb-2 sticky top-0 bg-background py-1">Categories</div>

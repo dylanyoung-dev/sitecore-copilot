@@ -87,9 +87,7 @@ export const McpToolsDrawer: React.FC<McpToolsDrawerProps> = ({
                 return (
                   <div
                     key={idx}
-                    className={`flex items-center justify-between px-4 py-3 ${
-                      available ? 'hover:bg-muted/50' : 'opacity-60'
-                    }`}
+                    className={`flex flex-col px-4 py-3 ${available ? 'hover:bg-muted/50' : 'opacity-60'}`}
                   >
                     <div
                       className={`flex items-center gap-3 ${available ? 'cursor-pointer' : ''} flex-1`}
@@ -98,8 +96,24 @@ export const McpToolsDrawer: React.FC<McpToolsDrawerProps> = ({
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border bg-muted">
                         {server.type === 'http' ? <Globe2 className="h-4 w-4" /> : <Blocks className="h-4 w-4" />}
                       </div>
-                      <div>
-                        <div className="font-medium">{server.name}</div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium">{server.name}</div>
+                          <Switch
+                            checked={sessionEnabledServers[server.id] === true}
+                            disabled={!available || server.security === 'oauth'} // Disable if not available or security is oauth
+                            onCheckedChange={(checked) => {
+                              if (available && server.security !== 'oauth') {
+                                setSessionEnabledServers((prev) => ({
+                                  ...prev,
+                                  [server.id]: checked,
+                                }));
+                              }
+                            }}
+                            aria-label={`Enable ${server.name} for this session`}
+                            className="cursor-pointer"
+                          />
+                        </div>
                         <div className="text-xs text-muted-foreground truncate max-w-[240px]">
                           {!available
                             ? 'Must configure a matching Instance to use MCP Server'
@@ -120,9 +134,9 @@ export const McpToolsDrawer: React.FC<McpToolsDrawerProps> = ({
                                   viewBox="0 0 24 24"
                                   fill="none"
                                   stroke="currentColor"
-                                  stroke-width="2"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
                                   className="lucide lucide-plug-icon lucide-plug h-3 w-3"
                                 >
                                   <path d="M12 22v-5" />
@@ -151,20 +165,24 @@ export const McpToolsDrawer: React.FC<McpToolsDrawerProps> = ({
                         )}
                       </div>
                     </div>
-                    <Switch
-                      checked={sessionEnabledServers[server.id] === true}
-                      disabled={!available}
-                      onCheckedChange={(checked) => {
-                        if (available) {
-                          setSessionEnabledServers((prev) => ({
-                            ...prev,
-                            [server.id]: checked,
-                          }));
-                        }
-                      }}
-                      aria-label={`Enable ${server.name} for this session`}
-                      className="cursor-pointer"
-                    />
+
+                    {/* Add "Click to Connect" button for OAuth servers */}
+                    {server.security === 'oauth' && (
+                      <div className="mt-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs"
+                          onClick={() => {
+                            // Handle OAuth connection logic here
+                            console.log(`Connecting to ${server.name}...`);
+                          }}
+                        >
+                          Click to Connect
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 );
               })}

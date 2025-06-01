@@ -65,3 +65,12 @@ servers:
     security: 'open'
     description: 'Coming Soon!'
     category: 'Automation'
+
+  - label: 'Atlassian'
+    name: 'Atlassian'
+    category: 'Collaboration'
+    url: 'https://mcp.atlassian.com/v1/sse'
+    type: 'sse'
+    security: 'oauth'
+    disable: false
+    description: 'Atlassian Tools for Jira, Confluence and More'
