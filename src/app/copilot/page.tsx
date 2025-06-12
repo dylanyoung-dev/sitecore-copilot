@@ -12,42 +12,18 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { IInstance } from '@/models/IInstance';
 import { enumTokenCategories, IToken } from '@/models/IToken';
 import { Separator } from '@radix-ui/react-separator';
-import { useEffect, useState } from 'react';
+import { useTokens } from '@/hooks/use-tokens';
+import { useInstances } from '@/hooks/use-instances';
 
 export default function CopilotPage() {
-  const [instances, setInstances] = useState<IInstance[]>([]);
-  const [aiTokens, setAiTokens] = useState<IToken[]>([]);
+  const { tokens } = useTokens();
+  const { instances } = useInstances();
 
-  // Load instances
-  useEffect(() => {
-    const saved = localStorage.getItem('instances');
-    if (saved) {
-      try {
-        const parsedInstances = JSON.parse(saved);
-        setInstances(parsedInstances);
-      } catch (error) {
-        console.error('Error parsing instances from localStorage:', error);
-      }
-    }
-  }, []);
-
-  // Load AI tokens
-  useEffect(() => {
-    const savedTokens = localStorage.getItem('api-tokens');
-    if (savedTokens) {
-      try {
-        const parsedTokens = JSON.parse(savedTokens);
-        // Filter tokens for AI category
-        const aiProviderTokens = parsedTokens.filter((token: IToken) => token.category === enumTokenCategories.AI);
-        setAiTokens(aiProviderTokens);
-      } catch (error) {
-        console.error('Error parsing tokens from localStorage:', error);
-      }
-    }
-  }, []);
+  // You can now use `tokens` and `instances` directly
+  // For example, to find the active AI token:
+  const aiToken = tokens.find((t) => t.active && t.category === enumTokenCategories.AI);
 
   return (
     <SidebarProvider>
@@ -73,8 +49,8 @@ export default function CopilotPage() {
         <div className="container mx-auto py-6 px-4">
           <div className="">
             <div className="p-6">
-              {aiTokens.length > 0 ? (
-                <CopilotChat tokens={aiTokens} instances={instances} />
+              {aiToken ? (
+                <CopilotChat tokens={tokens} instances={instances} />
               ) : (
                 <div className="text-center py-6">
                   <p className="text-muted-foreground">
