@@ -4,6 +4,7 @@ import { FeatureFlagProvider } from '../context/FeatureFlagContext';
 import './globals.css';
 import { StorageProvider } from '@/context/StorageContext';
 import { ThemeProvider } from '@/components/theme-provider';
+import GoogleTagManager from '@/components/GoogleTagManager';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -29,6 +30,9 @@ export default function RootLayout({
     <StorageProvider>
       <FeatureFlagProvider>
         <html lang="en" suppressHydrationWarning>
+          <head>
+            <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ''} />
+          </head>
           <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
               {children}
