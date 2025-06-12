@@ -6,9 +6,17 @@ import { createMcpClientConfig, headersToRecord } from '@/utils/mcpUtils';
 import { createOpenAI } from '@ai-sdk/openai';
 import { experimental_createMCPClient, streamText } from 'ai';
 import { createAnthropic } from '@ai-sdk/anthropic';
+import { Langfuse } from 'langfuse-node';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
+
+// Initialize Langfuse client
+const langfuse = new Langfuse({
+  publicKey: process.env.LANGFUSE_PUBLIC_KEY || '',
+  secretKey: process.env.LANGFUSE_SECRET_KEY || '',
+  baseUrl: process.env.LANGFUSE_HOST || 'https://cloud.langfuse.com',
+});
 
 interface ChatRequest {
   messages: any[];
@@ -17,6 +25,16 @@ interface ChatRequest {
   allTokens?: IToken[]; // All available tokens
   model: string;
   mcpServers?: IMcpServer[];
+}
+
+interface ToolCall {
+  name: string;
+  args: Record<string, any>;
+}
+
+interface Completion {
+  content: string;
+  role: string;
 }
 
 async function initializeMcpClients(mcpServers: IMcpServer[], instances: IInstance[] = []) {
@@ -72,6 +90,17 @@ export async function POST(req: Request) {
     mcpServers = [],
   }: ChatRequest = await req.json();
 
+  // Create a new trace for this chat session
+  const trace = langfuse.trace({
+    name: 'chat-session',
+    metadata: {
+      model,
+      provider: tokenData.provider,
+      instances: instances.map((i) => i.name),
+      mcpServers: mcpServers.map((s) => s.name),
+    },
+  });
+
   // Instead, just use the servers as provided (they should already have correct headers from YAML/config).
   const updatedMcpServers = mcpServers;
 
@@ -114,7 +143,6 @@ export async function POST(req: Request) {
           apiKey: tokenToUse.token,
         });
         break;
-
       default:
         aiClient = createOpenAI({
           apiKey: tokenToUse.token,
@@ -126,8 +154,6 @@ export async function POST(req: Request) {
       content: `You are a Copilot assistant. 
 
     Instructions
-
-
     
     Format your responses using markdown:
     - Use **bold** for important concepts
@@ -138,6 +164,12 @@ export async function POST(req: Request) {
     Respond concisely and focus on practical solutions.`,
     };
 
+    // Log the input messages
+    await trace.span({
+      name: 'input-messages',
+      input: messages,
+    });
+
     try {
       const result = streamText({
         model: aiClient(model),
@@ -146,8 +178,32 @@ export async function POST(req: Request) {
         maxSteps: 3,
       });
 
+      // Log the completion
+      await trace.span({
+        name: 'completion',
+        metadata: {
+          model,
+          provider: tokenToUse.provider,
+        },
+      });
+
+      // End the trace
+      await trace.update({
+        metadata: { status: 'success' },
+      });
+
       return result.toDataStreamResponse();
     } catch (toolError) {
+      // Log the error
+      await trace.span({
+        name: 'error',
+        level: 'ERROR',
+        input: toolError,
+      });
+      await trace.update({
+        metadata: { status: 'error' },
+      });
+
       console.error('Tool execution error:', toolError);
       return new Response(
         JSON.stringify({
@@ -161,6 +217,16 @@ export async function POST(req: Request) {
       );
     }
   } catch (error) {
+    // Log the error
+    await trace.span({
+      name: 'error',
+      level: 'ERROR',
+      input: error,
+    });
+    await trace.update({
+      metadata: { status: 'error' },
+    });
+
     console.error('API error:', error);
     return new Response(
       JSON.stringify({
