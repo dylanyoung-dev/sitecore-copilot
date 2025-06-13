@@ -149,20 +149,16 @@ export async function POST(req: Request) {
         });
     }
 
+    const prompt = await langfuse.getPrompt('mycopilot-primary');
+
     const systemPrompt = {
       role: 'system',
-      content: `You are a Copilot assistant. 
-
-    Instructions
-    
-    Format your responses using markdown:
-    - Use **bold** for important concepts
-    - Use bullet points for lists
-    - Keep responses concise and practical
-    - Break up long responses with headings
-    
-    Respond concisely and focus on practical solutions.`,
+      content:
+        prompt?.prompt ||
+        'You are a Copilot assistant. You are able to use the tools provided to you to help the user to achieve tasks.',
     };
+
+    console.log('System Prompt: ', systemPrompt);
 
     // Log the input messages
     await trace.span({
