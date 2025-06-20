@@ -27,3 +27,33 @@ For a full list of features, please see the [issues](https://github.com/dylanyou
 ## Security
 
 All keys and integrations are stored in local storage, which means we do not store any of your keys or integrations on our servers. This is a security feature to ensure that your keys and integrations are not exposed to anyone else. However, this also means that if you clear your local storage, you will lose all of your keys and integrations. Please make sure to back up your keys and integrations before clearing your local storage.
+
+## Local Development Instructions
+
+To set up the application locally, follow these steps:
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/dylanyoung-dev/sitecore-copilot.git
+   cd sitecore-copilot
+   ```
+2. **Install Dependencies**
+   Make sure you have Node.js and npm installed, then run:
+   ```bash
+   npm install
+   ```
+3. **Set Up Environment Variables**
+   Create a `.env` file in the root directory and add your environment variables:
+   ```env
+   NEXT_PUBLIC_LANGFUSE_SECRET_KEY=your_langfuse_secret_key
+   NEXT_PUBLIC_LANGFUSE_PUBLIC_KEY=your_langfuse_public_key
+   NEXT_PUBLIC_LANGFUSE_HOST=your_langfuse_host
+   NEXT_PUBLIC_GTM_ID=your_gtm_id
+   ```
+4. **Run the Application**
+   Start the development server:
+   ```bash
+   npm run dev
+   ```
+5. **Access the Application**
+   Open your web browser and navigate to `http://localhost:3000`.
