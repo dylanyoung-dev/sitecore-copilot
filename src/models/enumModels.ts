@@ -14,16 +14,18 @@ export interface ModelOption {
 
 export const models: ModelOption[] = [
   // OpenAI Models
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: AIProvider.OpenAI },
+  { id: 'gpt-4-1', name: 'GPT-4.1', provider: AIProvider.OpenAI },
+  { id: 'gpt-4-1-nano', name: 'GPT-4.1 Nano', provider: AIProvider.OpenAI },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: AIProvider.OpenAI },  
   { id: 'gpt-4o', name: 'GPT-4o', provider: AIProvider.OpenAI },
   { id: 'gpt-4', name: 'GPT-4 Turbo', provider: AIProvider.OpenAI },
   { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', provider: AIProvider.OpenAI },
 
   // Anthropic Models
-  { id: 'claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', provider: AIProvider.Anthropic },
-  { id: 'claude-3-opus', name: 'Claude 3 Opus', provider: AIProvider.Anthropic },
-  { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', provider: AIProvider.Anthropic },
-  { id: 'claude-3-haiku', name: 'Claude 3 Haiku', provider: AIProvider.Anthropic },
+  { id: 'claude-4-sonnet', name: 'Claude 4 Sonnet', provider: AIProvider.Anthropic },
+  { id: 'claude-4-opus', name: 'Claude 4 Opus', provider: AIProvider.Anthropic },
+  { id: 'claude-3-7-sonnet', name: 'Claude 3.7 Sonnet', provider: AIProvider.Anthropic },
+  { id: 'claude-3-5-haiku', name: 'Claude 3.5 Haiku', provider: AIProvider.Anthropic },
 ];
 
 // Helper function to get available models by provider
